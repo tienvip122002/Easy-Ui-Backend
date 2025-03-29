@@ -1,9 +1,8 @@
-﻿using System;
-
-namespace EasyUiBackend.Domain.Entities;
-
-public class UIComponent
+﻿
+namespace EasyUiBackend.Domain.Entities
 {
-	public Guid Id { get; set; }
-	public string Name { get; set; }
+	public class UIComponent : BaseEntity
+	{
+		public required string Name { get; set; }
+	}
 }
