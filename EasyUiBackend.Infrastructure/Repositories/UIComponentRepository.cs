@@ -1,5 +1,5 @@
-﻿using EasyUiBackend.Application.Interfaces;
-using EasyUiBackend.Domain.Entities;
+﻿using EasyUiBackend.Domain.Entities;
+using EasyUiBackend.Domain.Interfaces;
 using EasyUiBackend.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,30 +14,31 @@ public class UIComponentRepository : IUIComponentRepository
 		_context = context;
 	}
 
-	public async Task<List<UIComponent>> GetAllAsync()
+	public async Task<IEnumerable<UIComponent>> GetAllAsync()
 		=> await _context.UIComponents.ToListAsync();
 
 	public async Task<UIComponent?> GetByIdAsync(Guid id)
 		=> await _context.UIComponents.FindAsync(id);
 
-	public async Task AddAsync(UIComponent component)
+	public async Task<UIComponent> AddAsync(UIComponent entity)
 	{
-		_context.UIComponents.Add(component);
+		await _context.UIComponents.AddAsync(entity);
 		await _context.SaveChangesAsync();
+		return entity;
 	}
 
-	public async Task UpdateAsync(UIComponent component)
+	public async Task UpdateAsync(UIComponent entity)
 	{
-		_context.UIComponents.Update(component);
+		_context.Entry(entity).State = EntityState.Modified;
 		await _context.SaveChangesAsync();
 	}
 
 	public async Task DeleteAsync(Guid id)
 	{
-		var item = await _context.UIComponents.FindAsync(id);
-		if (item != null)
+		var entity = await GetByIdAsync(id);
+		if (entity != null)
 		{
-			_context.UIComponents.Remove(item);
+			_context.UIComponents.Remove(entity);
 			await _context.SaveChangesAsync();
 		}
 	}

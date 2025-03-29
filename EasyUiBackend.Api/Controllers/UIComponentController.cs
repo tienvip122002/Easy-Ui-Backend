@@ -1,53 +1,71 @@
-﻿using EasyUiBackend.Application.Interfaces;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using EasyUiBackend.Domain.Interfaces;
 using EasyUiBackend.Domain.Entities;
-using Microsoft.AspNetCore.Mvc;
+using EasyUiBackend.Domain.Models.UIComponent;
 
 namespace EasyUiBackend.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class UIComponentController : ControllerBase
 {
-	private readonly IUIComponentRepository _repo;
+	private readonly IUIComponentRepository _repository;
 
-	public UIComponentController(IUIComponentRepository repo)
+	public UIComponentController(IUIComponentRepository repository)
 	{
-		_repo = repo;
+		_repository = repository;
 	}
 
 	[HttpGet]
-	public async Task<IActionResult> GetAll() => Ok(await _repo.GetAllAsync());
+	public async Task<ActionResult<IEnumerable<UIComponent>>> GetAll()
+	{
+		var result = await _repository.GetAllAsync();
+		return Ok(result);
+	}
 
 	[HttpGet("{id}")]
-	public async Task<IActionResult> GetById(Guid id)
+	public async Task<ActionResult<UIComponent>> GetById(Guid id)
 	{
-		var result = await _repo.GetByIdAsync(id);
-		return result is null ? NotFound() : Ok(result);
+		var result = await _repository.GetByIdAsync(id);
+		if (result == null)
+			return NotFound();
+		return Ok(result);
 	}
 
 	[HttpPost]
-	public async Task<IActionResult> Create(UIComponent input)
+	public async Task<ActionResult<UIComponent>> Create([FromBody] CreateUIComponentRequest request)
 	{
-		input.Id = Guid.NewGuid();
-		await _repo.AddAsync(input);
-		return CreatedAtAction(nameof(GetById), new { id = input.Id }, input);
+		var component = new UIComponent
+		{
+			Id = Guid.NewGuid(),
+			Name = request.Name,
+
+		};
+
+		var result = await _repository.AddAsync(component);
+		return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
 	}
 
 	[HttpPut("{id}")]
-	public async Task<IActionResult> Update(Guid id, UIComponent input)
+	public async Task<IActionResult> Update(Guid id, [FromBody] UpdateUIComponentRequest request)
 	{
-		var existing = await _repo.GetByIdAsync(id);
-		if (existing is null) return NotFound();
+		var existing = await _repository.GetByIdAsync(id);
+		if (existing == null)
+			return NotFound();
 
-		existing.Name = input.Name;
-		await _repo.UpdateAsync(existing);
+		existing.Name = request.Name;
+
+
+		await _repository.UpdateAsync(existing);
 		return NoContent();
 	}
 
 	[HttpDelete("{id}")]
 	public async Task<IActionResult> Delete(Guid id)
 	{
-		await _repo.DeleteAsync(id);
+		await _repository.DeleteAsync(id);
 		return NoContent();
 	}
 }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace easyUiBackend.Domain.Entities
+namespace EasyUiBackend.Domain.Entities
 {
 	public class ApplicationUser : IdentityUser
 	{
