@@ -54,11 +54,12 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // Cấu hình DbContext
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
 // Cấu hình Identity
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
     // Password settings
     options.Password.RequireDigit = true;
@@ -90,19 +91,28 @@ builder.Services.AddAuthentication(options =>
 {
     options.SaveToken = true;
     options.RequireHttpsMetadata = false;
+    var jwtSecret = builder.Configuration["JWT:Secret"];
+    if (string.IsNullOrEmpty(jwtSecret))
+    {
+        throw new InvalidOperationException("JWT:Secret is not configured");
+    }
+
     options.TokenValidationParameters = new TokenValidationParameters()
     {
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidAudience = builder.Configuration["JWT:ValidAudience"],
         ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
     };
 });
 
 // Thêm vào phần services
 builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.AddScoped<IUIComponentRepository, UIComponentRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ITagRepository, TagRepository>();
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 
 var app = builder.Build();
 
@@ -122,15 +132,16 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
+// Seed Data
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
-        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         var context = services.GetRequiredService<AppDbContext>();
-        await DefaultData.SeedDataAsync(userManager, roleManager, context);
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
+        await DefaultData.SeedDataAsync(context, userManager, roleManager);
     }
     catch (Exception ex)
     {

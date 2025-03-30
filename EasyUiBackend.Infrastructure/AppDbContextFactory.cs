@@ -1,24 +1,26 @@
-﻿using EasyUiBackend.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using EasyUiBackend.Infrastructure.Persistence;
 
-namespace EasyUiBackend.Infrastructure;
-
-public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
+namespace EasyUiBackend.Infrastructure
 {
-	public AppDbContext CreateDbContext(string[] args)
+	public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
 	{
-		var config = new ConfigurationBuilder()
-			.SetBasePath(Directory.GetCurrentDirectory())
-			.AddJsonFile("appsettings.json")
-			.Build();
+		public AppDbContext CreateDbContext(string[] args)
+		{
+			// Đọc configuration từ appsettings.json
+			IConfigurationRoot configuration = new ConfigurationBuilder()
+				.SetBasePath(Directory.GetCurrentDirectory())
+				.AddJsonFile("appsettings.json")
+				.Build();
 
-		var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-		var connectionString = config.GetConnectionString("DefaultConnection");
+			var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+			var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-		optionsBuilder.UseNpgsql(connectionString);
+			optionsBuilder.UseNpgsql(connectionString);
 
-		return new AppDbContext(optionsBuilder.Options);
+			return new AppDbContext(optionsBuilder.Options);
+		}
 	}
 }
