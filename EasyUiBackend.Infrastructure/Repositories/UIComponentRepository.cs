@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using EasyUiBackend.Domain.Entities;
+﻿using EasyUiBackend.Domain.Entities;
 using EasyUiBackend.Domain.Interfaces;
 using EasyUiBackend.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 
@@ -34,26 +34,26 @@ public class UIComponentRepository : IUIComponentRepository
 			.FirstOrDefaultAsync();
 	}
 
-	public async Task<UIComponent> AddAsync(UIComponent component)
+	public async Task<UIComponent> AddAsync(UIComponent entity)
 	{
-		await _context.UIComponents.AddAsync(component);
+		await _context.UIComponents.AddAsync(entity);
 		await _context.SaveChangesAsync();
-		return _mapper.Map<UIComponent>(component);
+		return _mapper.Map<UIComponent>(entity);
 	}
 
-	public async Task UpdateAsync(UIComponent component)
+	public async Task UpdateAsync(UIComponent entity)
 	{
-		component.UpdatedAt = DateTime.UtcNow;
-		_context.UIComponents.Update(component);
+		entity.UpdatedAt = DateTime.UtcNow;
+		_context.Entry(entity).State = EntityState.Modified;
 		await _context.SaveChangesAsync();
 	}
 
 	public async Task DeleteAsync(Guid id)
 	{
-		var component = await _context.UIComponents.FindAsync(id);
-		if (component != null)
+		var entity = await _context.UIComponents.FindAsync(id);
+		if (entity != null)
 		{
-			component.IsActive = false;
+			entity.IsActive = false; // Soft delete
 			await _context.SaveChangesAsync();
 		}
 	}
