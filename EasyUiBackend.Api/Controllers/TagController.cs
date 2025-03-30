@@ -10,7 +10,7 @@ namespace EasyUiBackend.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+// [Authorize]  // Comment tạm dòng này để test
 public class TagController : ControllerBase
 {
     private readonly ITagRepository _repository;
@@ -23,29 +23,53 @@ public class TagController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Tag>>> GetAll()
+    public async Task<ActionResult<IEnumerable<TagDto>>> GetAll()
     {
-        var result = await _repository.GetAllAsync();
-        return Ok(result);
+        try
+        {
+            var tags = await _repository.GetAllAsync();
+            var tagDtos = tags.Select(t => new TagDto { ... });
+            return Ok(tagDtos);
+        }
+        catch (Exception ex)
+        {
+            // Log error here
+            return StatusCode(500, "An error occurred while fetching tags");
+        }
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Tag>> GetById(Guid id)
+    public async Task<ActionResult<TagDto>> GetById(Guid id)
     {
-        var result = await _repository.GetByIdAsync(id);
-        if (result == null)
+        var tag = await _repository.GetByIdAsync(id);
+        if (tag == null)
             return NotFound();
-        return Ok(result);
+        
+        var tagDto = new TagDto
+        {
+            Id = tag.Id,
+            Name = tag.Name,
+            CreatedAt = tag.CreatedAt,
+            CreatedBy = tag.CreatedBy
+        };
+        return Ok(tagDto);
     }
 
     [HttpPost]
-    public async Task<ActionResult<Tag>> Create([FromBody] CreateTagRequest request)
+    public async Task<ActionResult<TagDto>> Create([FromBody] CreateTagRequest request)
     {
         var tag = _mapper.Map<Tag>(request);
         tag.CreatedBy = User.GetUserId();
 
         var result = await _repository.AddAsync(tag);
-        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+        var tagDto = new TagDto
+        {
+            Id = result.Id,
+            Name = result.Name,
+            CreatedAt = result.CreatedAt,
+            CreatedBy = result.CreatedBy
+        };
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, tagDto);
     }
 
     [HttpPut("{id}")]

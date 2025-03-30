@@ -10,13 +10,21 @@ using EasyUiBackend.Infrastructure.Services;
 using EasyUiBackend.Infrastructure.Seeds;
 using EasyUiBackend.Infrastructure.Repositories;
 using Microsoft.OpenApi.Models;
+
+using System.Text.Json.Serialization;
+
 using AutoMapper;
 using EasyUiBackend.Infrastructure.Mappings;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
 
 // Cấu hình Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
