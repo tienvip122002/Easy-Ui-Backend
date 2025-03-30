@@ -4,6 +4,7 @@ using EasyUiBackend.Domain.Interfaces;
 using EasyUiBackend.Domain.Entities;
 using EasyUiBackend.Domain.Models.Comment;
 using EasyUiBackend.Api.Extensions;
+using AutoMapper;
 
 namespace EasyUiBackend.Api.Controllers;
 
@@ -13,10 +14,12 @@ namespace EasyUiBackend.Api.Controllers;
 public class CommentController : ControllerBase
 {
     private readonly ICommentRepository _repository;
+    private readonly IMapper _mapper;
 
-    public CommentController(ICommentRepository repository)
+    public CommentController(ICommentRepository repository, IMapper mapper)
     {
         _repository = repository;
+        _mapper = mapper;
     }
 
     [HttpGet("component/{componentId}")]
@@ -38,12 +41,8 @@ public class CommentController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Comment>> Create([FromBody] CreateCommentRequest request)
     {
-        var comment = new Comment
-        {
-            Content = request.Content,
-            ComponentId = request.ComponentId,
-            CreatedBy = User.GetUserId()
-        };
+        var comment = _mapper.Map<Comment>(request);
+        comment.CreatedBy = User.GetUserId();
 
         var result = await _repository.AddAsync(comment);
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);

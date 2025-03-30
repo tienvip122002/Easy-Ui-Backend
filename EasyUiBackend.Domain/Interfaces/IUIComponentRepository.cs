@@ -1,4 +1,5 @@
 using EasyUiBackend.Domain.Entities;
+using EasyUiBackend.Domain.Interfaces;
 
 namespace EasyUiBackend.Domain.Interfaces
 {

@@ -4,6 +4,7 @@ using EasyUiBackend.Domain.Interfaces;
 using EasyUiBackend.Domain.Entities;
 using EasyUiBackend.Domain.Models.Tag;
 using EasyUiBackend.Api.Extensions;
+using AutoMapper;
 
 namespace EasyUiBackend.Api.Controllers;
 
@@ -13,10 +14,12 @@ namespace EasyUiBackend.Api.Controllers;
 public class TagController : ControllerBase
 {
     private readonly ITagRepository _repository;
+    private readonly IMapper _mapper;
 
-    public TagController(ITagRepository repository)
+    public TagController(ITagRepository repository, IMapper mapper)
     {
         _repository = repository;
+        _mapper = mapper;
     }
 
     [HttpGet]
@@ -38,11 +41,8 @@ public class TagController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Tag>> Create([FromBody] CreateTagRequest request)
     {
-        var tag = new Tag
-        {
-            Name = request.Name,
-            CreatedBy = User.GetUserId()
-        };
+        var tag = _mapper.Map<Tag>(request);
+        tag.CreatedBy = User.GetUserId();
 
         var result = await _repository.AddAsync(tag);
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
