@@ -4,6 +4,7 @@ using EasyUiBackend.Domain.Interfaces;
 using EasyUiBackend.Domain.Entities;
 using EasyUiBackend.Domain.Models.Category;
 using EasyUiBackend.Api.Extensions;
+using AutoMapper;
 
 namespace EasyUiBackend.Api.Controllers;
 
@@ -13,10 +14,12 @@ namespace EasyUiBackend.Api.Controllers;
 public class CategoryController : ControllerBase
 {
     private readonly ICategoryRepository _repository;
+    private readonly IMapper _mapper;
 
-    public CategoryController(ICategoryRepository repository)
+    public CategoryController(ICategoryRepository repository, IMapper mapper)
     {
         _repository = repository;
+        _mapper = mapper;
     }
 
     [HttpGet]
@@ -38,12 +41,8 @@ public class CategoryController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Category>> Create([FromBody] CreateCategoryRequest request)
     {
-        var category = new Category
-        {
-            Name = request.Name,
-            Description = request.Description,
-            CreatedBy = User.GetUserId() // Extension method để lấy UserId từ Claims
-        };
+        var category = _mapper.Map<Category>(request);
+        category.CreatedBy = User.GetUserId();
 
         var result = await _repository.AddAsync(category);
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
@@ -56,8 +55,7 @@ public class CategoryController : ControllerBase
         if (existing == null)
             return NotFound();
 
-        existing.Name = request.Name;
-        existing.Description = request.Description;
+        _mapper.Map(request, existing);
         existing.UpdatedBy = User.GetUserId();
 
         await _repository.UpdateAsync(existing);
