@@ -10,7 +10,12 @@ using EasyUiBackend.Infrastructure.Services;
 using EasyUiBackend.Infrastructure.Seeds;
 using EasyUiBackend.Infrastructure.Repositories;
 using Microsoft.OpenApi.Models;
+
 using System.Text.Json.Serialization;
+
+using AutoMapper;
+using EasyUiBackend.Infrastructure.Mappings;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -118,6 +123,7 @@ builder.Services.AddScoped<IUIComponentRepository, UIComponentRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddAutoMapper(typeof(CategoryMapping).Assembly);
 
 var app = builder.Build();
 

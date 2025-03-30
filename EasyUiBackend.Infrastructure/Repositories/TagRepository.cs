@@ -2,42 +2,43 @@ using Microsoft.EntityFrameworkCore;
 using EasyUiBackend.Domain.Entities;
 using EasyUiBackend.Domain.Interfaces;
 using EasyUiBackend.Infrastructure.Persistence;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 
 namespace EasyUiBackend.Infrastructure.Repositories
 {
     public class TagRepository : ITagRepository
     {
         private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
 
-        public TagRepository(AppDbContext context)
+        public TagRepository(AppDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         public async Task<IEnumerable<Tag>> GetAllAsync()
         {
             return await _context.Tags
-                .Include(t => t.Creator)
-                .Include(t => t.Updater)
-                .Include(t => t.Components)
                 .Where(t => t.IsActive)
+                .ProjectTo<Tag>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }
 
         public async Task<Tag?> GetByIdAsync(Guid id)
         {
             return await _context.Tags
-                .Include(t => t.Creator)
-                .Include(t => t.Updater)
-                .Include(t => t.Components)
-                .FirstOrDefaultAsync(t => t.Id == id && t.IsActive);
+                .Where(t => t.Id == id && t.IsActive)
+                .ProjectTo<Tag>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<Tag> AddAsync(Tag tag)
         {
             await _context.Tags.AddAsync(tag);
             await _context.SaveChangesAsync();
-            return tag;
+            return _mapper.Map<Tag>(tag);
         }
 
         public async Task UpdateAsync(Tag tag)
