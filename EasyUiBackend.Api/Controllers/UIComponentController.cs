@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using EasyUiBackend.Domain.Interfaces;
 using EasyUiBackend.Domain.Entities;
 using EasyUiBackend.Domain.Models.UIComponent;
+using EasyUiBackend.Api.Extensions;
 
 namespace EasyUiBackend.Api.Controllers;
 
@@ -41,7 +42,12 @@ public class UIComponentController : ControllerBase
 		{
 			Id = Guid.NewGuid(),
 			Name = request.Name,
-
+			Code = request.Code,
+			Description = request.Description,
+			PreviewUrl = request.PreviewUrl,
+			Type = request.Type,
+			Framework = request.Framework,
+			CreatedBy = User.GetUserId()
 		};
 
 		var result = await _repository.AddAsync(component);

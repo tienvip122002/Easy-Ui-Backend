@@ -6,45 +6,40 @@ namespace EasyUiBackend.Infrastructure.Seeds
 {
     public static class DefaultData
     {
-        public static async Task SeedDataAsync(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, AppDbContext context)
+        public static async Task SeedDataAsync(AppDbContext context, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
         {
-            // Seed Roles
             await SeedRolesAsync(roleManager);
-            
-            // Seed Admin User
-            await SeedAdminUserAsync(userManager);
-            
-            // Seed UI Components
+            await SeedUsersAsync(userManager);
             await SeedUIComponentsAsync(context);
+            await SeedCategoriesAsync(context);
+            await SeedTagsAsync(context);
+            await context.SaveChangesAsync();
         }
 
-        private static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
+        private static async Task SeedRolesAsync(RoleManager<ApplicationRole> roleManager)
         {
             if (!await roleManager.RoleExistsAsync("Admin"))
-                await roleManager.CreateAsync(new IdentityRole("Admin"));
-            
-            if (!await roleManager.RoleExistsAsync("User"))
-                await roleManager.CreateAsync(new IdentityRole("User"));
+            {
+                await roleManager.CreateAsync(new ApplicationRole("Admin"));
+            }
+            if (!await roleManager.RoleExistsAsync("Creator"))
+            {
+                await roleManager.CreateAsync(new ApplicationRole("Creator"));
+            }
         }
 
-        public static async Task SeedAdminUserAsync(UserManager<ApplicationUser> userManager)
+        private static async Task SeedUsersAsync(UserManager<ApplicationUser> userManager)
         {
-            var adminUser = new ApplicationUser
+            if (await userManager.FindByEmailAsync("admin@example.com") == null)
             {
-                UserName = "admin@example.com",
-                Email = "admin@example.com",
-                EmailConfirmed = true,
-                PhoneNumber = "1234567890",
-                FullName = "System Administrator"
-            };
-
-            if (await userManager.FindByEmailAsync(adminUser.Email) == null)
-            {
-                var result = await userManager.CreateAsync(adminUser, "Admin@123");
-                if (result.Succeeded)
+                var user = new ApplicationUser
                 {
-                    await userManager.AddToRoleAsync(adminUser, "Admin");
-                }
+                    UserName = "admin",
+                    Email = "admin@example.com",
+                    EmailConfirmed = true
+                };
+                await userManager.CreateAsync(user, "Admin123!");
+                await userManager.AddToRoleAsync(user, "Admin");
             }
         }
 
@@ -54,28 +49,45 @@ namespace EasyUiBackend.Infrastructure.Seeds
             {
                 var components = new List<UIComponent>
                 {
-                    new UIComponent 
-                    { 
-                        Id = Guid.NewGuid(),
-                        Name = "Button Component",
-                        CreatedAt = DateTime.UtcNow
-                    },
-                    new UIComponent 
-                    { 
-                        Id = Guid.NewGuid(),
-                        Name = "Input Component",
-                        CreatedAt = DateTime.UtcNow
-                    },
-                    new UIComponent 
-                    { 
-                        Id = Guid.NewGuid(),
-                        Name = "Table Component",
-                        CreatedAt = DateTime.UtcNow
+                    new UIComponent
+                    {
+                        Name = "Primary Button",
+                        Description = "A standard button with primary style",
+                        Code = "<button class=\"btn-primary\">Click me</button>",
+                        PreviewUrl = "https://example.com/button.png",
+                        Type = "component",
+                        Framework = "HTML/CSS"
                     }
                 };
-
                 await context.UIComponents.AddRangeAsync(components);
-                await context.SaveChangesAsync();
+            }
+        }
+
+        private static async Task SeedCategoriesAsync(AppDbContext context)
+        {
+            if (!context.Categories.Any())
+            {
+                var categories = new List<Category>
+                {
+                    new Category { Name = "Buttons", Description = "All types of buttons" },
+                    new Category { Name = "Forms", Description = "Form components and layouts" },
+                    new Category { Name = "Navigation", Description = "Navigation components" }
+                };
+                await context.Categories.AddRangeAsync(categories);
+            }
+        }
+
+        private static async Task SeedTagsAsync(AppDbContext context)
+        {
+            if (!context.Tags.Any())
+            {
+                var tags = new List<Tag>
+                {
+                    new Tag { Name = "responsive" },
+                    new Tag { Name = "tailwind" },
+                    new Tag { Name = "dark-mode" }
+                };
+                await context.Tags.AddRangeAsync(tags);
             }
         }
     }

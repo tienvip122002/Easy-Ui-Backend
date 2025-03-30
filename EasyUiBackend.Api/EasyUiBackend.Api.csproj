@@ -17,8 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EasyUiBackend.Domain\EasyUiBackend.Domain.csproj" />
     <ProjectReference Include="..\EasyUiBackend.Infrastructure\EasyUiBackend.Infrastructure.csproj" />
+    <ProjectReference Include="..\EasyUiBackend.Domain\EasyUiBackend.Domain.csproj" />
   </ItemGroup>
 
 </Project>
