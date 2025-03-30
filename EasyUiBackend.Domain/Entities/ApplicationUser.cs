@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.Text.Json.Serialization;
 
 namespace EasyUiBackend.Domain.Entities
 {
@@ -18,6 +19,7 @@ namespace EasyUiBackend.Domain.Entities
 		public virtual ICollection<Category> UpdatedCategories { get; set; } = new List<Category>();
 		public virtual ICollection<Tag> CreatedTags { get; set; } = new List<Tag>();
 		public virtual ICollection<Tag> UpdatedTags { get; set; } = new List<Tag>();
+		[JsonIgnore]
 		public virtual ICollection<Comment> CreatedComments { get; set; } = new List<Comment>();
 		public virtual ICollection<Comment> UpdatedComments { get; set; } = new List<Comment>();
 	}
