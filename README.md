@@ -1,9 +1,8 @@
 xóa migration
- 
- dotnet ef database drop --project EasyUiBackend.Infrastructure\Migrations --startup-project EasyUiBackend.Api
+dotnet ef database drop --project EasyUiBackend.Infrastructure --startup-project EasyUiBackend.Api --context AppDbContext
 
 tạo migration
- dotnet ef migrations add InitialCreate --project EasyUiBackend.Infrastructure\Persistence\ --startup-project AppDbContext.cs
+dotnet ef database update --project EasyUiBackend.Infrastructure --startup-project EasyUiBackend.Api --context AppDbContext
 
- cập nhập 
-  dotnet ef database update --project EasyUiBackend.Infrastructure --startup-project EasyUiBackend.Api
+cập nhập 
+dotnet ef database update --project EasyUiBackend.Infrastructure --startup-project EasyUiBackend.Api --context AppDbContext
