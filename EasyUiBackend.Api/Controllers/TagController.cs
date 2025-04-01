@@ -28,7 +28,13 @@ public class TagController : ControllerBase
         try
         {
             var tags = await _repository.GetAllAsync();
-            var tagDtos = tags.Select(t => new TagDto { ... });
+            var tagDtos = tags.Select(t => new TagDto
+            {
+                Id = t.Id,
+                Name = t.Name,
+                CreatedAt = t.CreatedAt,
+                CreatedBy = t.CreatedBy
+            });
             return Ok(tagDtos);
         }
         catch (Exception ex)
