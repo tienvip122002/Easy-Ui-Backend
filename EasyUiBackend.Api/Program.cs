@@ -15,6 +15,7 @@ using System.Text.Json.Serialization;
 
 using AutoMapper;
 using EasyUiBackend.Infrastructure.Mappings;
+using System.Text.Encodings.Web;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +24,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
+        options.JsonSerializerOptions.WriteIndented = true;
+        options.JsonSerializerOptions.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 // Cấu hình cors
