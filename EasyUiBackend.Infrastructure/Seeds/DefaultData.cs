@@ -53,10 +53,12 @@ namespace EasyUiBackend.Infrastructure.Seeds
                     {
                         Name = "Primary Button",
                         Description = "A standard button with primary style",
-                        Code = "<button class=\"btn-primary\">Click me</button>",
+                        Html = "<button class=\"btn-primary\">Click me</button>",
+                        Css = ".btn-primary { background-color: blue; color: white; }",
+                        Js = "document.querySelector('.btn-primary').addEventListener('click', function() { alert('Button clicked!'); });",
                         PreviewUrl = "https://example.com/button.png",
                         Type = "component",
-                        Framework = "HTML/CSS"
+                        Framework = "HTML/CSS/JS"
                     }
                 };
                 await context.UIComponents.AddRangeAsync(components);
