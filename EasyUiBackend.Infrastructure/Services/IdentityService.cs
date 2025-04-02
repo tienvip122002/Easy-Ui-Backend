@@ -27,7 +27,7 @@ namespace EasyUiBackend.Infrastructure.Services
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
-                throw new Exception("User not found");
+                throw new Exception("User, Email not found");
 
             var isPasswordValid = await _userManager.CheckPasswordAsync(user, request.Password);
             if (!isPasswordValid)
@@ -46,7 +46,7 @@ namespace EasyUiBackend.Infrastructure.Services
         {
             var userExists = await _userManager.FindByEmailAsync(request.Email);
             if (userExists != null)
-                throw new Exception("User already exists");
+                throw new Exception("User, Email already exists");
 
             var user = new ApplicationUser
             {
