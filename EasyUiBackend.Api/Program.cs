@@ -25,6 +25,17 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
+// Cấu hình cors
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
 // Cấu hình Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -126,7 +137,8 @@ builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddAutoMapper(typeof(CategoryMapping).Assembly);
 
 var app = builder.Build();
-
+// Sau phần app.UseRouting() và trước app.UseEndpoints() hoặc app.MapControllers()
+app.UseCors("AllowReactApp");
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
