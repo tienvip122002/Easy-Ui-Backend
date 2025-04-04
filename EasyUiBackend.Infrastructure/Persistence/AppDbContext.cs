@@ -16,6 +16,7 @@ namespace EasyUiBackend.Infrastructure.Persistence
 		public DbSet<Category> Categories { get; set; }
 		public DbSet<Tag> Tags { get; set; }
 		public DbSet<Comment> Comments { get; set; }
+		public DbSet<Cart> Carts { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
@@ -87,6 +88,19 @@ namespace EasyUiBackend.Infrastructure.Persistence
 				.WithMany(a => a.UpdatedComments)
 				.HasForeignKey(c => c.UpdatedBy)
 				.OnDelete(DeleteBehavior.SetNull);
+
+			// Configure Cart relationships
+			builder.Entity<Cart>()
+				.HasOne(c => c.User)
+				.WithMany()
+				.HasForeignKey(c => c.UserId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			builder.Entity<Cart>()
+				.HasOne(c => c.UIComponent)
+				.WithMany()
+				.HasForeignKey(c => c.UIComponentId)
+				.OnDelete(DeleteBehavior.Cascade);
 		}
 	}
 }

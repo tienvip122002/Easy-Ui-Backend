@@ -18,6 +18,8 @@ public class UIComponentMapping : Profile
 			.ForMember(dest => dest.PreviewUrl, opt => opt.MapFrom(src => src.PreviewUrl))
 			.ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type))
 			.ForMember(dest => dest.Framework, opt => opt.MapFrom(src => src.Framework))
+			.ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price))
+			.ForMember(dest => dest.DiscountPrice, opt => opt.MapFrom(src => src.DiscountPrice))
 			.ForMember(dest => dest.CreatedBy, opt => opt.MapFrom(src => src.CreatedBy))
 			.ForMember(dest => dest.UpdatedBy, opt => opt.MapFrom(src => src.UpdatedBy))
 			.ForMember(dest => dest.Creator, opt => opt.MapFrom(src => src.Creator))
@@ -25,5 +27,13 @@ public class UIComponentMapping : Profile
 
 		CreateMap<CreateUIComponentRequest, UIComponent>();
 		CreateMap<UpdateUIComponentRequest, UIComponent>();
+
+		CreateMap<UIComponent, UIComponentDto>()
+			.ForMember(dest => dest.Categories, opt => 
+				opt.MapFrom(src => src.Categories.Select(c => c.Name)))
+			.ForMember(dest => dest.Tags, opt => 
+				opt.MapFrom(src => src.Tags.Select(t => t.Name)));
+
+		CreateMap<UIComponent, UIComponentListDto>();
 	}
 }

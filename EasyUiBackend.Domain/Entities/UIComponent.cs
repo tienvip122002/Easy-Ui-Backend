@@ -53,6 +53,16 @@
 			/// <example>Bootstrap 5</example>
 			public string? Framework { get; set; }
 
+			/// <summary>
+			/// The price of the component.
+			/// </summary>
+			public decimal Price { get; set; }
+
+			/// <summary>
+			/// The discount price of the component.
+			/// </summary>
+			public decimal? DiscountPrice { get; set; }
+
 			// Navigation properties
 			public virtual ApplicationUser? Creator { get; set; }
 			public virtual ApplicationUser? Updater { get; set; }
