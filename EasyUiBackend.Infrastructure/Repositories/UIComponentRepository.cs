@@ -18,20 +18,35 @@ public class UIComponentRepository : IUIComponentRepository
 		_mapper = mapper;
 	}
 
-	public async Task<IEnumerable<UIComponent>> GetAllAsync()
+	public async Task<IEnumerable<UIComponent>> GetAllAsync(string includeProperties = "")
 	{
-		return await _context.UIComponents
-			.Where(c => c.IsActive)
-			.ProjectTo<UIComponent>(_mapper.ConfigurationProvider)
+		IQueryable<UIComponent> query = _context.UIComponents
+			.AsNoTracking()
+			.Where(x => x.IsActive); // Chỉ lấy các component đang active
+
+		foreach (var includeProperty in includeProperties.Split
+			(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+		{
+			query = query.Include(includeProperty);
+		}
+
+		return await query
+			.OrderByDescending(x => x.CreatedAt)
 			.ToListAsync();
 	}
 
-	public async Task<UIComponent?> GetByIdAsync(Guid id)
+	public async Task<UIComponent> GetByIdAsync(Guid id, string includeProperties = "")
 	{
-		return await _context.UIComponents
-			.Where(c => c.Id == id && c.IsActive)
-			.ProjectTo<UIComponent>(_mapper.ConfigurationProvider)
-			.FirstOrDefaultAsync();
+		IQueryable<UIComponent> query = _context.UIComponents
+			.AsNoTracking();
+
+		foreach (var includeProperty in includeProperties.Split
+			(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+		{
+			query = query.Include(includeProperty);
+		}
+
+		return await query.FirstOrDefaultAsync(x => x.Id == id);
 	}
 
 	public async Task<UIComponent> AddAsync(UIComponent entity)

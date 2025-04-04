@@ -22,5 +22,8 @@ namespace EasyUiBackend.Domain.Entities
 		[JsonIgnore]
 		public virtual ICollection<Comment> CreatedComments { get; set; } = new List<Comment>();
 		public virtual ICollection<Comment> UpdatedComments { get; set; } = new List<Comment>();
+
+		// Add this property to your ApplicationUser class
+		public virtual ICollection<Cart> CartItems { get; set; } = new List<Cart>();
 	}
 }

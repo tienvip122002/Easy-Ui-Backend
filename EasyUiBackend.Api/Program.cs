@@ -37,6 +37,7 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
+
     });
 });
 
@@ -137,6 +138,7 @@ builder.Services.AddScoped<IUIComponentRepository, UIComponentRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddAutoMapper(typeof(CategoryMapping).Assembly);
 
 var app = builder.Build();

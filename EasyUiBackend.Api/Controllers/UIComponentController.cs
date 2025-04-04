@@ -23,19 +23,26 @@ public class UIComponentController : ControllerBase
 	}
 
 	[HttpGet]
-	public async Task<ActionResult<IEnumerable<UIComponent>>> GetAll()
+	public async Task<ActionResult<IEnumerable<UIComponentListDto>>> GetAll()
 	{
-		var result = await _repository.GetAllAsync();
-		return Ok(result);
+		var components = await _repository.GetAllAsync(includeProperties: "Categories,Tags");
+		var dtos = _mapper.Map<IEnumerable<UIComponentListDto>>(components);
+		return Ok(dtos);
 	}
 
 	[HttpGet("{id}")]
-	public async Task<ActionResult<UIComponent>> GetById(Guid id)
+	public async Task<ActionResult<UIComponentDto>> GetById(Guid id)
 	{
-		var result = await _repository.GetByIdAsync(id);
-		if (result == null)
+		var component = await _repository.GetByIdAsync(
+			id,
+			includeProperties: "Categories,Tags,Comments"
+		);
+
+		if (component == null)
 			return NotFound();
-		return Ok(result);
+
+		var dto = _mapper.Map<UIComponentDto>(component);
+		return Ok(dto);
 	}
 
 	[HttpPost]
