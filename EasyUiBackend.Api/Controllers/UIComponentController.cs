@@ -5,7 +5,8 @@ using EasyUiBackend.Domain.Entities;
 using EasyUiBackend.Domain.Models.UIComponent;
 using EasyUiBackend.Api.Extensions;
 using AutoMapper;
-
+using Microsoft.EntityFrameworkCore;
+using EasyUiBackend.Infrastructure.Persistence;
 namespace EasyUiBackend.Api.Controllers;
 
 [ApiController]
@@ -15,11 +16,13 @@ public class UIComponentController : ControllerBase
 {
 	private readonly IUIComponentRepository _repository;
 	private readonly IMapper _mapper;
+	private readonly AppDbContext _context;
 
-	public UIComponentController(IUIComponentRepository repository, IMapper mapper)
+	public UIComponentController(IUIComponentRepository repository, IMapper mapper, AppDbContext context)
 	{
 		_repository = repository;
 		_mapper = mapper;
+		_context = context;
 	}
 
 	[HttpGet]
@@ -73,6 +76,35 @@ public class UIComponentController : ControllerBase
 	public async Task<IActionResult> Delete(Guid id)
 	{
 		await _repository.DeleteAsync(id);
+		return NoContent();
+	}
+
+	[HttpPost("{id}/categories")]
+	public async Task<IActionResult> AddCategories(Guid id, [FromBody] AddCategoriesToComponentRequest request)
+	{
+		var component = await _context.UIComponents
+			.Include(c => c.Categories)
+			.FirstOrDefaultAsync(c => c.Id == id);
+
+		if (component == null)
+			return NotFound("UI Component not found");
+
+		var categories = await _context.Categories
+			.Where(c => request.CategoryIds.Contains(c.Id))
+			.ToListAsync();
+
+		if (categories.Count != request.CategoryIds.Count)
+			return BadRequest("One or more categories not found");
+
+		foreach (var category in categories)
+		{
+			if (!component.Categories.Any(c => c.Id == category.Id))
+			{
+				component.Categories.Add(category);
+			}
+		}
+
+		await _context.SaveChangesAsync();
 		return NoContent();
 	}
 }

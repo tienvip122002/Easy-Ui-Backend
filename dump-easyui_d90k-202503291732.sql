@@ -182,7 +182,22 @@ INSERT INTO AspNetUserRoles (UserId, RoleId) VALUES
 INSERT INTO Categories (name, description) VALUES
 ('Buttons', 'All types of buttons'),
 ('Cards', 'Card layouts and content blocks'),
-('Navigation', 'Navbar, sidebar, breadcrumbs, etc.');
+('Navigation', 'Navbar, sidebar, breadcrumbs, etc.'),
+('Forms & Inputs', 'Form elements and input controls'),
+('Modals & Dialogs', 'Popup windows and modal components'),
+('Tables', 'Table components and data display'),
+('Colors & Themes', 'Color palettes and theme options'),
+('Borders & Shadows', 'Border styles and shadow effects'),
+('Typography', 'Text styles and fonts'),
+('Icons', 'Icon sets and usage'),
+('Grid System', 'Layout grid structure'),
+('Flexbox Helpers', 'Utilities for flexbox layout'),
+('Spacing & Sizing', 'Padding, margin, width and height helpers'),
+('Login Forms', 'UI for login and authentication'),
+('Dashboards', 'Admin and dashboard interfaces'),
+('Landing Pages', 'Introductory or marketing web pages'),
+('E-commerce UI', 'UI elements for online stores');
+
 
 -- Insert Tags
 INSERT INTO Tags (name) VALUES

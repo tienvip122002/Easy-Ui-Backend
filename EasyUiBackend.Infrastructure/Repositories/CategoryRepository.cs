@@ -23,6 +23,7 @@ public class CategoryRepository : ICategoryRepository
         return await _context.Categories
             .Where(c => c.IsActive)
             .ProjectTo<Category>(_mapper.ConfigurationProvider)
+            .OrderBy(c => c.Name)
             .ToListAsync();
     }
 
