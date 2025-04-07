@@ -1,5 +1,6 @@
 using EasyUiBackend.Domain.Entities;
 using EasyUiBackend.Domain.Interfaces;
+using EasyUiBackend.Domain.Models.Category;
 
 namespace EasyUiBackend.Domain.Interfaces
 {
@@ -10,5 +11,6 @@ namespace EasyUiBackend.Domain.Interfaces
         Task<Category> AddAsync(Category category);
         Task UpdateAsync(Category category);
         Task DeleteAsync(Guid id);
+        Task<IEnumerable<Category>> SearchAsync(SearchCategoryRequest request);
     }
 } 

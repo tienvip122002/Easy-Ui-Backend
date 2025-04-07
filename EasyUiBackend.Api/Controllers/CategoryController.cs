@@ -17,11 +17,13 @@ public class CategoryController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly IMapper _mapper;
+    private readonly ICategoryRepository _repository;
 
-    public CategoryController(AppDbContext context, IMapper mapper)
+    public CategoryController(AppDbContext context, IMapper mapper, ICategoryRepository repository)
     {
         _context = context;
         _mapper = mapper;
+        _repository = repository;
     }
 
     [HttpGet]
@@ -104,5 +106,19 @@ public class CategoryController : ControllerBase
 
         await _context.SaveChangesAsync();
         return NoContent();
+    }
+
+    [HttpPost("search")]
+    public async Task<ActionResult<IEnumerable<Category>>> Search([FromBody] SearchCategoryRequest request)
+    {
+        try
+        {
+            var results = await _repository.SearchAsync(request);
+            return Ok(results);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, "An error occurred while processing your request.");
+        }
     }
 } 
