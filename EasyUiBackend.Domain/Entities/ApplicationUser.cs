@@ -7,6 +7,9 @@ namespace EasyUiBackend.Domain.Entities
 	{
 		// 
 		public string? FullName { get; set; }
+		public string? Avatar { get; set; }
+		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+		public bool IsActive { get; set; } = true;
 
 		// Navigation properties
 		public virtual ICollection<UIComponent> CreatedComponents { get; set; } = new List<UIComponent>();

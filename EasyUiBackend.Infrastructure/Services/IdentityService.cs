@@ -7,6 +7,7 @@ using System.Text;
 using EasyUiBackend.Domain.Entities;
 using EasyUiBackend.Domain.Interfaces;
 using EasyUiBackend.Domain.Models.Auth;
+using AutoMapper;
 
 namespace EasyUiBackend.Infrastructure.Services
 {
@@ -14,13 +15,16 @@ namespace EasyUiBackend.Infrastructure.Services
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
+        private readonly IMapper _mapper;
 
         public IdentityService(
             UserManager<ApplicationUser> userManager,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IMapper mapper)
         {
             _userManager = userManager;
             _configuration = configuration;
+            _mapper = mapper;
         }
 
         public async Task<AuthResponse> LoginAsync(LoginRequest request)
@@ -50,11 +54,11 @@ namespace EasyUiBackend.Infrastructure.Services
 
             var user = new ApplicationUser
             {
+                UserName = request.UserName,
                 Email = request.Email,
-                UserName = request.Email,
                 FullName = request.FullName,
-                PhoneNumber = request.PhoneNumber,
-                SecurityStamp = Guid.NewGuid().ToString()
+                Avatar = request.Avatar,
+                CreatedAt = DateTime.UtcNow
             };
 
             var result = await _userManager.CreateAsync(user, request.Password);
@@ -110,6 +114,20 @@ namespace EasyUiBackend.Infrastructure.Services
         {
             // Implement token revocation if needed
             throw new NotImplementedException();
+        }
+
+        public async Task<UserProfileDto> GetUserProfileAsync(Guid userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
+                throw new Exception("User not found");
+
+            var roles = await _userManager.GetRolesAsync(user);
+            
+            var profile = _mapper.Map<UserProfileDto>(user);
+            profile.Roles = roles.ToList();
+            
+            return profile;
         }
     }
 } 

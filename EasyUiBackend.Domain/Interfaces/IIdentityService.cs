@@ -8,5 +8,6 @@ namespace EasyUiBackend.Domain.Interfaces
         Task<AuthResponse> RegisterAsync(RegisterRequest request);
         Task<AuthResponse> RefreshTokenAsync(string refreshToken);
         Task<bool> RevokeTokenAsync(string userId);
+        Task<UserProfileDto> GetUserProfileAsync(Guid userId);
     }
 } 
