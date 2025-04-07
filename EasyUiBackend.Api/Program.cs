@@ -139,6 +139,7 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<IAboutUsRepository, AboutUsRepository>();
 builder.Services.AddAutoMapper(typeof(CategoryMapping).Assembly);
 
 var app = builder.Build();
