@@ -35,7 +35,37 @@ public class MomoPaymentService : IPaymentService
 
     public async Task<bool> ProcessMomoCallbackAsync(IDictionary<string, string> callbackData)
     {
-        // Implement Momo callback processing logic here
+        try
+        {
+            // Verify Momo callback data
+            if (IsValidCallback(callbackData))
+            {
+                var orderId = Guid.Parse(callbackData["orderId"]);
+                var order = await _orderRepository.GetByIdAsync(orderId);
+                
+                if (order != null)
+                {
+                    // Update payment status
+                    order.PaymentStatus = "Completed";
+                    order.Status = "Processing"; // Automatically update order status
+                    order.PaidAt = DateTime.UtcNow;
+                    order.TransactionId = callbackData["transactionId"];
+                    
+                    await _orderRepository.UpdateAsync(order);
+                    return true;
+                }
+            }
+            return false;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    private bool IsValidCallback(IDictionary<string, string> callbackData)
+    {
+        // Implement Momo signature verification logic here
         return true;
     }
 

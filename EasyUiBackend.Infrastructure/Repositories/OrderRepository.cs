@@ -57,4 +57,25 @@ public class OrderRepository : IOrderRepository
             .Include(o => o.User)
             .FirstOrDefaultAsync(o => o.Id == id);
     }
+
+    public async Task<IEnumerable<Order>> GetAllOrdersAsync()
+    {
+        return await _context.Orders
+            .Include(o => o.Items)
+                .ThenInclude(i => i.UIComponent)
+            .Include(o => o.User)
+            .OrderByDescending(o => o.CreatedAt)
+            .ToListAsync();
+    }
+
+    public async Task UpdateOrderStatusAsync(Guid id, string status)
+    {
+        var order = await _context.Orders.FindAsync(id);
+        if (order != null)
+        {
+            order.Status = status;
+            order.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+        }
+    }
 } 
