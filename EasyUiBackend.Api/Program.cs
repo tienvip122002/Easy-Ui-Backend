@@ -140,7 +140,12 @@ builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<IAboutUsRepository, AboutUsRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IPaymentService, MomoPaymentService>();
 builder.Services.AddAutoMapper(typeof(CategoryMapping).Assembly);
+
+// Add HttpClient
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 // Sau phần app.UseRouting() và trước app.UseEndpoints() hoặc app.MapControllers()

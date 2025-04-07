@@ -18,6 +18,9 @@ namespace EasyUiBackend.Infrastructure.Persistence
 		public DbSet<Comment> Comments { get; set; }
 		public DbSet<Cart> Carts { get; set; }
 		public DbSet<AboutUs> AboutUs { get; set; }
+		public DbSet<Order> Orders { get; set; }
+		public DbSet<OrderItem> OrderItems { get; set; }
+		public DbSet<Payment> Payments { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
@@ -102,6 +105,24 @@ namespace EasyUiBackend.Infrastructure.Persistence
 				.WithMany()
 				.HasForeignKey(c => c.UIComponentId)
 				.OnDelete(DeleteBehavior.Cascade);
+
+			builder.Entity<Order>()
+				.HasOne(o => o.User)
+				.WithMany()
+				.HasForeignKey(o => o.UserId)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			builder.Entity<OrderItem>()
+				.HasOne(oi => oi.Order)
+				.WithMany(o => o.Items)
+				.HasForeignKey(oi => oi.OrderId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			builder.Entity<Payment>()
+				.HasOne(p => p.Order)
+				.WithMany()
+				.HasForeignKey(p => p.OrderId)
+				.OnDelete(DeleteBehavior.Restrict);
 		}
 	}
 }
