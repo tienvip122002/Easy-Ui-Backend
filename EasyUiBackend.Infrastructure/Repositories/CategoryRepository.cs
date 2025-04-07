@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using EasyUiBackend.Domain.Entities;
 using EasyUiBackend.Domain.Interfaces;
+using EasyUiBackend.Domain.Models.Category;
 using EasyUiBackend.Infrastructure.Persistence;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -57,5 +58,27 @@ public class CategoryRepository : ICategoryRepository
             category.IsActive = false;
             await _context.SaveChangesAsync();
         }
+    }
+
+    public async Task<IEnumerable<Category>> SearchAsync(SearchCategoryRequest request)
+    {
+        IQueryable<Category> query = _context.Categories
+            .AsNoTracking()
+            .Where(x => x.IsActive);
+
+        // Search by keyword in name and description (case-insensitive)
+        if (!string.IsNullOrEmpty(request.Keyword))
+        {
+            var keyword = request.Keyword.ToLower();
+            query = query.Where(x => 
+                EF.Functions.Like(x.Name.ToLower(), $"%{keyword}%") || 
+                (x.Description != null && EF.Functions.Like(x.Description.ToLower(), $"%{keyword}%"))
+            );
+        }
+
+        return await query
+            .Include(x => x.Components)
+            .OrderBy(x => x.Name)
+            .ToListAsync();
     }
 } 

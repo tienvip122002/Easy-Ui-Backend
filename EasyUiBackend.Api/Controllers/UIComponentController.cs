@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Authorization;
 using EasyUiBackend.Domain.Interfaces;
 using EasyUiBackend.Domain.Entities;
 using EasyUiBackend.Domain.Models.UIComponent;
+using EasyUiBackend.Domain.Models.Common;
 using EasyUiBackend.Api.Extensions;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using EasyUiBackend.Infrastructure.Persistence;
+using EasyUiBackend.Api.Models;
 namespace EasyUiBackend.Api.Controllers;
 
 [ApiController]
@@ -106,5 +108,57 @@ public class UIComponentController : ControllerBase
 
 		await _context.SaveChangesAsync();
 		return NoContent();
+	}
+
+	[HttpPost("search")]
+	public async Task<ActionResult<PaginatedResponse<UIComponentListDto>>> Search([FromBody] SearchUIComponentRequest request)
+	{
+		try
+		{
+			var (items, totalCount) = await _repository.SearchAsync(request);
+			
+			var dtos = _mapper.Map<IEnumerable<UIComponentListDto>>(items);
+			
+			var response = new PaginatedResponse<UIComponentListDto>
+			{
+				Items = dtos,
+				TotalCount = totalCount,
+				PageNumber = request.PageNumber,
+				PageSize = request.PageSize,
+				TotalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize)
+			};
+
+			return Ok(response);
+		}
+		catch (Exception ex)
+		{
+			return StatusCode(500, "An error occurred while processing your request.");
+		}
+	}
+
+	[HttpPost("filter")]
+	public async Task<ActionResult<PaginatedResponse<UIComponentListDto>>> Filter([FromBody] FilterUIComponentRequest request)
+	{
+		try
+		{
+			var (items, totalCount) = await _repository.FilterAsync(request);
+			
+			var dtos = _mapper.Map<IEnumerable<UIComponentListDto>>(items);
+			
+			var response = new PaginatedResponse<UIComponentListDto>
+			{
+				Items = dtos,
+				TotalCount = totalCount,
+				PageNumber = request.PageNumber,
+				PageSize = request.PageSize,
+				TotalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize)
+			};
+
+			return Ok(response);
+		}
+		catch (Exception ex)
+		{
+			return StatusCode(500, "An error occurred while processing your request.");
+		}
 	}
 }
