@@ -8,7 +8,7 @@ namespace EasyUiBackend.Api.Controllers;
 
 [ApiController]
 [Route("api/admin/orders")]
-[Authorize(Roles = "Admin")] // Chỉ admin mới có quyền truy cập
+//[Authorize(Roles = "Admin")] // Chỉ admin mới có quyền truy cập
 public class AdminOrderController : ControllerBase
 {
     private readonly IOrderRepository _orderRepository;
