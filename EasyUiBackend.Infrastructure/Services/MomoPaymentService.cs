@@ -5,6 +5,7 @@ using EasyUiBackend.Domain.Interfaces;
 using EasyUiBackend.Domain.Models.Payment;
 using System.Net.Http.Json;
 using System.Text.Json;
+using EasyUiBackend.Domain.Entities;
 
 namespace EasyUiBackend.Infrastructure.Services;
 
@@ -13,15 +14,18 @@ public class MomoPaymentService : IPaymentService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IConfiguration _configuration;
     private readonly IOrderRepository _orderRepository;
+    private readonly IPaymentRepository _paymentRepository;
 
     public MomoPaymentService(
         IHttpClientFactory httpClientFactory,
         IConfiguration configuration,
-        IOrderRepository orderRepository)
+        IOrderRepository orderRepository,
+        IPaymentRepository paymentRepository)
     {
         _httpClientFactory = httpClientFactory;
         _configuration = configuration;
         _orderRepository = orderRepository;
+        _paymentRepository = paymentRepository;
     }
 
     public async Task<string> CreateMomoPaymentAsync(CreateMomoPaymentRequest request)
@@ -115,6 +119,19 @@ public class MomoPaymentService : IPaymentService
             order.PaymentOrderId = orderId;
             await _orderRepository.UpdateAsync(order);
 
+            // Tạo payment record
+            var payment = new Payment
+            {
+                OrderId = order.Id,
+                Provider = "MoMo",
+                Amount = order.TotalAmount,
+                Status = "Pending",
+                PaymentUrl = momoResponse.PayUrl,
+                ResponseData = responseContent // Lưu response từ MoMo
+            };
+
+            await _paymentRepository.AddAsync(payment);
+
             return momoResponse.PayUrl;
         }
         catch (Exception ex)
@@ -127,29 +144,63 @@ public class MomoPaymentService : IPaymentService
 
     public async Task<bool> ProcessMomoCallbackAsync(IDictionary<string, string> callbackData)
     {
-        if (!IsValidCallback(callbackData))
-            return false;
-
-        var orderId = Guid.Parse(callbackData["orderId"]);
-        var order = await _orderRepository.GetByIdAsync(orderId);
-        
-        if (order == null)
-            return false;
-
-        if (callbackData["resultCode"] == "0")
+        try 
         {
-            order.PaymentStatus = "Completed";
-            order.Status = "Processing";
-            order.PaidAt = DateTime.UtcNow;
-            order.TransactionId = callbackData["transId"];
-            
-            await _orderRepository.UpdateAsync(order);
-            return true;
-        }
+            if (!IsValidCallback(callbackData))
+                return false;
 
-        order.PaymentStatus = "Failed";
-        await _orderRepository.UpdateAsync(order);
-        return false;
+            var orderInfo = callbackData["orderInfo"];
+            var orderIdStr = orderInfo.Replace("Payment for order ", "").Trim();
+            
+            if (!Guid.TryParse(orderIdStr, out Guid orderId))
+            {
+                Console.WriteLine($"Invalid order ID format: {orderIdStr}");
+                return false;
+            }
+
+            var order = await _orderRepository.GetByIdAsync(orderId);
+            var payment = await _paymentRepository.GetByOrderIdAsync(orderId);
+            
+            if (order == null || payment == null)
+            {
+                Console.WriteLine($"Order or Payment not found: {orderId}");
+                return false;
+            }
+
+            if (callbackData["resultCode"] == "0")
+            {
+                // Cập nhật Order
+                order.PaymentStatus = "Completed";
+                order.Status = "Processing";
+                order.PaidAt = DateTime.UtcNow;
+                order.TransactionId = callbackData["transId"];
+                await _orderRepository.UpdateAsync(order);
+
+                // Cập nhật Payment
+                payment.Status = "Completed";
+                payment.TransactionId = callbackData["transId"];
+                payment.PaidAt = DateTime.UtcNow;
+                payment.ResponseData = JsonSerializer.Serialize(callbackData);
+                await _paymentRepository.UpdateAsync(payment);
+
+                return true;
+            }
+
+            // Cập nhật trạng thái thất bại
+            order.PaymentStatus = "Failed";
+            await _orderRepository.UpdateAsync(order);
+
+            payment.Status = "Failed";
+            payment.ResponseData = JsonSerializer.Serialize(callbackData);
+            await _paymentRepository.UpdateAsync(payment);
+
+            return false;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error processing MoMo callback: {ex.Message}");
+            return false;
+        }
     }
 
     private bool IsValidCallback(IDictionary<string, string> callbackData)
