@@ -11,4 +11,5 @@ public interface IOrderRepository
     Task<Order?> GetOrderWithItemsAsync(Guid id);
     Task<IEnumerable<Order>> GetAllOrdersAsync();
     Task UpdateOrderStatusAsync(Guid id, string status);
+    Task<IEnumerable<Order>> GetPurchasedProductsAsync(Guid userId);
 } 

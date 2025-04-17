@@ -76,4 +76,26 @@ public class OrderController : ControllerBase
 
         return Ok(_mapper.Map<OrderDto>(order));
     }
+
+    [HttpGet("purchased-products")]
+    public async Task<ActionResult<IEnumerable<PurchasedProductDto>>> GetPurchasedProducts()
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var orders = await _orderRepository.GetPurchasedProductsAsync(userId);
+            
+            if (!orders.Any())
+            {
+                return Ok(new List<PurchasedProductDto>()); // Trả về danh sách rỗng nếu không có sản phẩm
+            }
+
+            var purchasedProducts = _mapper.Map<IEnumerable<PurchasedProductDto>>(orders);
+            return Ok(purchasedProducts);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "An error occurred while retrieving purchased products." });
+        }
+    }
 } 
