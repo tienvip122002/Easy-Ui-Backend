@@ -1,1 +1,1 @@
-web dotnet EasyUiBackend.Api.dll
+web: dotnet EasyUiBackend.Api.dll
