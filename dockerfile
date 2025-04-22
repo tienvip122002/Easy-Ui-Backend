@@ -15,7 +15,7 @@ COPY EasyUiBackend.Infrastructure/*.csproj ./EasyUiBackend.Infrastructure/
 RUN dotnet restore EasyUiBackend.sln
 
 # Sao chép toàn bộ mã nguồn vào container
-COPY . ./
+COPY . ./ 
 
 # Build ứng dụng
 RUN dotnet publish EasyUiBackend.Api -c Release -o /app/publish
@@ -24,13 +24,14 @@ RUN dotnet publish EasyUiBackend.Api -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 
-# Expose port 44319
-EXPOSE 44319
+# Expose port (có thể thử đổi thành cổng 80 nếu Render không hỗ trợ 44319)
+EXPOSE 80
 
 # Sao chép ứng dụng đã build từ bước 1 vào container
 COPY --from=build /app/publish . 
 
 # Lệnh để chạy ứng dụng .NET
 ENTRYPOINT ["dotnet", "EasyUiBackend.Api.dll"]
+
 # Tạo chứng chỉ HTTPS phát triển (bỏ comment nếu cần)
 # RUN dotnet dev-certs https --trust
