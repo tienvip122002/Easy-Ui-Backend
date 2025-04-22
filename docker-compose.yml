@@ -6,14 +6,14 @@ services:
     build: .
     image: easy-ui-backend
     ports:
-      - "44319:44319"    # Ánh xạ cổng 8080 từ container tới cổng 8080 trên máy chủ
+      - "80:80"  # Ánh xạ cổng 80 từ container tới cổng 80 trên máy chủ
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__DefaultConnection=Host=dpg-cvj27dur433s73fojlcg-a.oregon-postgres.render.com;Port=5432;Database=easyui_d90k;Username=easyui_d90k_user;Password=LQewHuJdWwYVMcyDNNnn3gUoIusDpnwL;SSL Mode=Require;Trust Server Certificate=true;
     depends_on:
       - db
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]  # Chỉnh lại healthcheck theo cổng đúng
       interval: 30s
       retries: 5
 
