@@ -32,7 +32,9 @@ public class UIComponentMapping : Profile
 			.ForMember(dest => dest.Categories, opt => 
 				opt.MapFrom(src => src.Categories.Select(c => c.Name)))
 			.ForMember(dest => dest.Tags, opt => 
-				opt.MapFrom(src => src.Tags.Select(t => t.Name)));
+				opt.MapFrom(src => src.Tags.Select(t => t.Name)))
+			.ForMember(dest => dest.Comments, opt => 
+				opt.MapFrom(src => src.Comments));
 
 		CreateMap<UIComponent, UIComponentListDto>();
 	}

@@ -1,4 +1,4 @@
-﻿namespace EasyUiBackend.Domain.Entities
+namespace EasyUiBackend.Domain.Entities
 {
 	/// <summary>
 	/// Represents a reusable UI component.

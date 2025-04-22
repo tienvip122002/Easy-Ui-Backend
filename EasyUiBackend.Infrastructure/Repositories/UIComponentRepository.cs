@@ -1,4 +1,4 @@
-﻿using EasyUiBackend.Domain.Entities;
+using EasyUiBackend.Domain.Entities;
 using EasyUiBackend.Domain.Interfaces;
 using EasyUiBackend.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

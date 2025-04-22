@@ -20,5 +20,10 @@ public class CommentMapping : Profile
 
         CreateMap<CreateCommentRequest, Comment>();
         CreateMap<UpdateCommentRequest, Comment>();
+        
+        // Map Comment entity to CommentDto
+        CreateMap<Comment, CommentDto>()
+            .ForMember(dest => dest.CreatorName, opt => opt.MapFrom(src => 
+                src.Creator != null ? src.Creator.UserName : null));
     }
 } 
