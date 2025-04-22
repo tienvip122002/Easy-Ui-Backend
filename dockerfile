@@ -31,5 +31,5 @@ COPY --from=build /app/publish .
 # Lệnh để chạy ứng dụng .NET
 ENTRYPOINT ["dotnet", "EasyUiBackend.Api.dll"]
 # Tạo chứng chỉ HTTPS phát triển
-RUN dotnet dev-certs https --trust
+# RUN dotnet dev-certs https --trust
 
