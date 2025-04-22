@@ -1,0 +1,32 @@
+version: '3.4'
+
+services:
+  # Dịch vụ cho ứng dụng .NET
+  web:
+    build: .
+    image: easy-ui-backend
+    ports:
+      - "44319:44319"    # Ánh xạ cổng 8080 từ container tới cổng 8080 trên máy chủ
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=dpg-cvj27dur433s73fojlcg-a.oregon-postgres.render.com;Port=5432;Database=easyui_d90k;Username=easyui_d90k_user;Password=LQewHuJdWwYVMcyDNNnn3gUoIusDpnwL;SSL Mode=Require;Trust Server Certificate=true;
+    depends_on:
+      - db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      retries: 5
+
+  # Dịch vụ PostgreSQL
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=mydb
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      retries: 5
