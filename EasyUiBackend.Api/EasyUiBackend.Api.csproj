@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
 	<InvariantGlobalization>false</InvariantGlobalization>
 	<UserSecretsId>333c92b3-0f83-4531-8d51-9dbec2e19c61</UserSecretsId>
+		  <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +17,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="System.Drawing.Common" Version="9.0.4" />
   </ItemGroup>
 
   <ItemGroup>

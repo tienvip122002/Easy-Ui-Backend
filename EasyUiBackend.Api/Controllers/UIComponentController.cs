@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using EasyUiBackend.Domain.Interfaces;
 using EasyUiBackend.Domain.Entities;
@@ -40,7 +40,7 @@ public class UIComponentController : ControllerBase
 	{
 		var component = await _repository.GetByIdAsync(
 			id,
-			includeProperties: "Categories,Tags,Comments"
+			includeProperties: "Categories,Tags,Comments,Comments.Creator"
 		);
 
 		if (component == null)

@@ -1,3 +1,5 @@
+using EasyUiBackend.Domain.Models.Comment;
+
 namespace EasyUiBackend.Domain.Models.UIComponent
 {
     public class UIComponentDto
@@ -5,9 +7,9 @@ namespace EasyUiBackend.Domain.Models.UIComponent
         public Guid Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-public string? Html { get; set; }
-			public string? Css { get; set; }
-			public string? Js { get; set; }
+        public string? Html { get; set; }
+        public string? Css { get; set; }
+        public string? Js { get; set; }
         public decimal Price { get; set; }
         public string PreviewImage { get; set; }
         public DateTime CreatedAt { get; set; }
@@ -18,6 +20,9 @@ public string? Html { get; set; }
         // Simplified navigation properties
         public ICollection<string> Categories { get; set; }
         public ICollection<string> Tags { get; set; }
+        
+        // Comments collection
+        public ICollection<CommentDto> Comments { get; set; } = new List<CommentDto>();
     }
 
     public class UIComponentListDto

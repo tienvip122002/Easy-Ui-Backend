@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using EasyUiBackend.Infrastructure.Persistence;
 using EasyUiBackend.Domain.Entities;
