@@ -53,6 +53,18 @@ public class UIComponentController : ControllerBase
 	[HttpPost]
 	public async Task<ActionResult<UIComponent>> Create([FromBody] CreateUIComponentRequest request)
 	{
+		// Đảm bảo Price có giá trị mặc định là 0 nếu không được cung cấp
+		if (request.Price == default)
+		{
+			request.Price = 0;
+		}
+
+		// Đảm bảo DiscountPrice có giá trị mặc định là 0 nếu không được cung cấp
+		if (request.DiscountPrice == null)
+		{
+			request.DiscountPrice = 0;
+		}
+
 		var component = _mapper.Map<UIComponent>(request);
 		component.CreatedBy = User.GetUserId();
 
@@ -66,6 +78,18 @@ public class UIComponentController : ControllerBase
 		var existing = await _repository.GetByIdAsync(id);
 		if (existing == null)
 			return NotFound();
+
+		// Đảm bảo Price có giá trị mặc định là 0 nếu không được cung cấp
+		if (request.Price == default)
+		{
+			request.Price = 0;
+		}
+
+		// Đảm bảo DiscountPrice có giá trị mặc định là 0 nếu không được cung cấp
+		if (request.DiscountPrice == null)
+		{
+			request.DiscountPrice = 0;
+		}
 
 		_mapper.Map(request, existing);
 		existing.UpdatedBy = User.GetUserId();
@@ -103,6 +127,35 @@ public class UIComponentController : ControllerBase
 			if (!component.Categories.Any(c => c.Id == category.Id))
 			{
 				component.Categories.Add(category);
+			}
+		}
+
+		await _context.SaveChangesAsync();
+		return NoContent();
+	}
+	
+	[HttpPost("{id}/tags")]
+	public async Task<IActionResult> AddTags(Guid id, [FromBody] AddTagsToComponentRequest request)
+	{
+		var component = await _context.UIComponents
+			.Include(c => c.Tags)
+			.FirstOrDefaultAsync(c => c.Id == id);
+
+		if (component == null)
+			return NotFound("UI Component not found");
+
+		var tags = await _context.Tags
+			.Where(t => request.TagIds.Contains(t.Id))
+			.ToListAsync();
+
+		if (tags.Count != request.TagIds.Count)
+			return BadRequest("One or more tags not found");
+
+		foreach (var tag in tags)
+		{
+			if (!component.Tags.Any(t => t.Id == tag.Id))
+			{
+				component.Tags.Add(tag);
 			}
 		}
 
