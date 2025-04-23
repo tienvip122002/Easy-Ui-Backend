@@ -10,7 +10,7 @@ namespace EasyUiBackend.Domain.Models.UIComponent
         public string? PreviewUrl { get; set; }
         public string? Type { get; set; }
         public string? Framework { get; set; }
-        public decimal Price { get; set; }
-        public decimal? DiscountPrice { get; set; }
+        public decimal Price { get; set; } = 0;
+        public decimal? DiscountPrice { get; set; } = 0;
     }
 } 

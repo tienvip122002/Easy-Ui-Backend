@@ -25,7 +25,9 @@ public class UIComponentMapping : Profile
 			.ForMember(dest => dest.Creator, opt => opt.MapFrom(src => src.Creator))
 			.ForMember(dest => dest.Updater, opt => opt.MapFrom(src => src.Updater));
 
-		CreateMap<CreateUIComponentRequest, UIComponent>();
+		CreateMap<CreateUIComponentRequest, UIComponent>()
+			.ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price))
+			.ForMember(dest => dest.DiscountPrice, opt => opt.MapFrom(src => src.DiscountPrice.HasValue ? src.DiscountPrice.Value : 0m));
 		CreateMap<UpdateUIComponentRequest, UIComponent>();
 
 		CreateMap<UIComponent, UIComponentDto>()
