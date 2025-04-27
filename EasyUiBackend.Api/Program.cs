@@ -144,7 +144,6 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IPaymentService, MomoPaymentService>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddAutoMapper(typeof(CategoryMapping).Assembly);
-builder.WebHost.UseUrls("http://0.0.0.0:80");
 
 
 // Add HttpClient

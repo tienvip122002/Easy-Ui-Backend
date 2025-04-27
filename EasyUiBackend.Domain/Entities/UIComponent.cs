@@ -56,12 +56,12 @@ namespace EasyUiBackend.Domain.Entities
 			/// <summary>
 			/// The price of the component.
 			/// </summary>
-			public decimal Price { get; set; }
+			public decimal Price { get; set; } = 0;
 
 			/// <summary>
 			/// The discount price of the component.
 			/// </summary>
-			public decimal? DiscountPrice { get; set; }
+			public decimal? DiscountPrice { get; set; } = 0;
 
 			// Navigation properties
 			public virtual ApplicationUser? Creator { get; set; }
