@@ -151,6 +151,7 @@ public class UIComponentRepository : IUIComponentRepository
 			"price_asc" => query.OrderBy(x => x.Price),
 			"price_desc" => query.OrderByDescending(x => x.Price),
 			"created_at_desc" => query.OrderByDescending(x => x.CreatedAt),
+			"likes_desc" => query.OrderByDescending(x => x.LikesCount),
 			_ => query.OrderByDescending(x => x.CreatedAt) // default sorting
 		};
 
@@ -166,5 +167,100 @@ public class UIComponentRepository : IUIComponentRepository
 			.ToListAsync();
 
 		return (items, totalCount);
+	}
+
+	// Like functionality implementation
+	public async Task<bool> LikeComponentAsync(Guid componentId, Guid userId)
+	{
+		// Check if component exists
+		var component = await _context.UIComponents.FindAsync(componentId);
+		if (component == null)
+			return false;
+
+		// Check if user already liked this component
+		var existingLike = await _context.ComponentLikes
+			.FirstOrDefaultAsync(cl => cl.UIComponentId == componentId && cl.UserId == userId);
+
+		if (existingLike != null)
+			return true; // Already liked
+
+		// Create new like
+		var like = new ComponentLike
+		{
+			UIComponentId = componentId,
+			UserId = userId,
+			LikedAt = DateTime.UtcNow
+		};
+
+		_context.ComponentLikes.Add(like);
+
+		// Increment like count on component
+		component.LikesCount += 1;
+
+		await _context.SaveChangesAsync();
+		return true;
+	}
+
+	public async Task<bool> UnlikeComponentAsync(Guid componentId, Guid userId)
+	{
+		// Find the like
+		var like = await _context.ComponentLikes
+			.FirstOrDefaultAsync(cl => cl.UIComponentId == componentId && cl.UserId == userId);
+
+		if (like == null)
+			return false; // Not liked previously
+
+		// Remove the like
+		_context.ComponentLikes.Remove(like);
+
+		// Decrement like count on component
+		var component = await _context.UIComponents.FindAsync(componentId);
+		if (component != null && component.LikesCount > 0)
+		{
+			component.LikesCount -= 1;
+		}
+
+		await _context.SaveChangesAsync();
+		return true;
+	}
+
+	public async Task<bool> IsLikedByUserAsync(Guid componentId, Guid userId)
+	{
+		return await _context.ComponentLikes
+			.AnyAsync(cl => cl.UIComponentId == componentId && cl.UserId == userId);
+	}
+
+	public async Task<IEnumerable<ComponentLike>> GetComponentLikesAsync(Guid componentId)
+	{
+		return await _context.ComponentLikes
+			.Where(cl => cl.UIComponentId == componentId)
+			.Include(cl => cl.User)
+			.OrderByDescending(cl => cl.LikedAt)
+			.ToListAsync();
+	}
+
+	public async Task<IEnumerable<UIComponent>> GetUserLikedComponentsAsync(Guid userId, string includeProperties = "")
+	{
+		// Lấy danh sách ComponentId mà user đã like
+		var likedComponentIds = await _context.ComponentLikes
+			.Where(cl => cl.UserId == userId)
+			.Select(cl => cl.UIComponentId)
+			.ToListAsync();
+
+		// Sau đó query các components dựa trên danh sách ID đó
+		IQueryable<UIComponent> query = _context.UIComponents
+			.AsNoTracking()
+			.Where(x => x.IsActive && likedComponentIds.Contains(x.Id));
+
+		// Áp dụng include properties
+		foreach (var includeProperty in includeProperties.Split
+			(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+		{
+			query = query.Include(includeProperty);
+		}
+
+		return await query
+			.OrderByDescending(x => x.CreatedAt)
+			.ToListAsync();
 	}
 }

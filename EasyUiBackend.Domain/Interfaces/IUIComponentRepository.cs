@@ -13,5 +13,12 @@ namespace EasyUiBackend.Domain.Interfaces
         Task DeleteAsync(Guid id);
         Task<(IEnumerable<UIComponent> Items, int TotalCount)> SearchAsync(SearchUIComponentRequest request);
         Task<(IEnumerable<UIComponent> Items, int TotalCount)> FilterAsync(FilterUIComponentRequest request);
+        
+        // Like functionality
+        Task<bool> LikeComponentAsync(Guid componentId, Guid userId);
+        Task<bool> UnlikeComponentAsync(Guid componentId, Guid userId);
+        Task<bool> IsLikedByUserAsync(Guid componentId, Guid userId);
+        Task<IEnumerable<ComponentLike>> GetComponentLikesAsync(Guid componentId);
+        Task<IEnumerable<UIComponent>> GetUserLikedComponentsAsync(Guid userId, string includeProperties = "");
     }
 } 

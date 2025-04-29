@@ -21,6 +21,7 @@ namespace EasyUiBackend.Infrastructure.Persistence
 		public DbSet<Order> Orders { get; set; }
 		public DbSet<OrderItem> OrderItems { get; set; }
 		public DbSet<Payment> Payments { get; set; }
+		public DbSet<ComponentLike> ComponentLikes { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
@@ -53,6 +54,27 @@ namespace EasyUiBackend.Infrastructure.Persistence
 				.HasMany(u => u.Tags)
 				.WithMany(t => t.Components)
 				.UsingEntity(j => j.ToTable("ComponentTags"));
+
+			// Configure ComponentLike relationships
+			builder.Entity<ComponentLike>()
+				.HasKey(cl => new { cl.UserId, cl.UIComponentId });
+
+			builder.Entity<ComponentLike>()
+				.HasOne(cl => cl.User)
+				.WithMany(u => u.LikedComponents)
+				.HasForeignKey(cl => cl.UserId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			builder.Entity<ComponentLike>()
+				.HasOne(cl => cl.UIComponent)
+				.WithMany(c => c.Likes)
+				.HasForeignKey(cl => cl.UIComponentId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			builder.Entity<UIComponent>()
+				.HasMany(c => c.LikedByUsers)
+				.WithMany(u => u.LikedUIComponents)
+				.UsingEntity<ComponentLike>();
 
 			// Configure Category relationships
 			builder.Entity<Category>()

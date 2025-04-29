@@ -1,6 +1,7 @@
 using AutoMapper;
 using EasyUiBackend.Domain.Entities;
 using EasyUiBackend.Domain.Models.UIComponent;
+using System.Linq;
 
 namespace EasyUiBackend.Infrastructure.Mappings;
 
@@ -36,8 +37,19 @@ public class UIComponentMapping : Profile
 			.ForMember(dest => dest.Tags, opt => 
 				opt.MapFrom(src => src.Tags.Select(t => t.Name)))
 			.ForMember(dest => dest.Comments, opt => 
-				opt.MapFrom(src => src.Comments));
+				opt.MapFrom(src => src.Comments))
+			.ForMember(dest => dest.LikesCount, opt => 
+				opt.MapFrom(src => src.LikesCount))
+			.ForMember(dest => dest.IsLikedByCurrentUser, opt => opt.Ignore());
 
-		CreateMap<UIComponent, UIComponentListDto>();
+		CreateMap<UIComponent, UIComponentListDto>()
+			.ForMember(dest => dest.LikesCount, opt => 
+				opt.MapFrom(src => src.LikesCount))
+			.ForMember(dest => dest.IsLikedByCurrentUser, opt => opt.Ignore());
+
+		// Mapping for ComponentLike
+		CreateMap<ComponentLike, ComponentLikeDto>()
+			.ForMember(dest => dest.Username, opt => 
+				opt.MapFrom(src => src.User.UserName));
 	}
 }

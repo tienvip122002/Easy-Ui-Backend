@@ -63,6 +63,11 @@ namespace EasyUiBackend.Domain.Entities
 			/// </summary>
 			public decimal? DiscountPrice { get; set; } = 0;
 
+			/// <summary>
+			/// The number of likes the component has received.
+			/// </summary>
+			public int LikesCount { get; set; } = 0;
+
 			// Navigation properties
 			public virtual ApplicationUser? Creator { get; set; }
 			public virtual ApplicationUser? Updater { get; set; }
@@ -70,5 +75,7 @@ namespace EasyUiBackend.Domain.Entities
 			public virtual ICollection<Tag> Tags { get; set; } = new List<Tag>();
 			public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 			public virtual ICollection<ApplicationUser> SavedByUsers { get; set; } = new List<ApplicationUser>();
+			public virtual ICollection<ComponentLike> Likes { get; set; } = new List<ComponentLike>();
+			public virtual ICollection<ApplicationUser> LikedByUsers { get; set; } = new List<ApplicationUser>();
 		}
 }
