@@ -32,6 +32,17 @@ public class UIComponentController : ControllerBase
 	{
 		var components = await _repository.GetAllAsync(includeProperties: "Categories,Tags");
 		var dtos = _mapper.Map<IEnumerable<UIComponentListDto>>(components);
+		
+		// Check if the current user has liked these components
+		if (User.Identity.IsAuthenticated)
+		{
+			var userId = User.GetUserId();
+			foreach (var dto in dtos)
+			{
+				dto.IsLikedByCurrentUser = await _repository.IsLikedByUserAsync(dto.Id, userId);
+			}
+		}
+		
 		return Ok(dtos);
 	}
 
@@ -47,6 +58,14 @@ public class UIComponentController : ControllerBase
 			return NotFound();
 
 		var dto = _mapper.Map<UIComponentDto>(component);
+		
+		// Check if the current user has liked this component
+		if (User.Identity.IsAuthenticated)
+		{
+			var userId = User.GetUserId();
+			dto.IsLikedByCurrentUser = await _repository.IsLikedByUserAsync(id, userId);
+		}
+		
 		return Ok(dto);
 	}
 
@@ -172,6 +191,16 @@ public class UIComponentController : ControllerBase
 			
 			var dtos = _mapper.Map<IEnumerable<UIComponentListDto>>(items);
 			
+			// Check if the current user has liked these components
+			if (User.Identity.IsAuthenticated)
+			{
+				var userId = User.GetUserId();
+				foreach (var dto in dtos)
+				{
+					dto.IsLikedByCurrentUser = await _repository.IsLikedByUserAsync(dto.Id, userId);
+				}
+			}
+			
 			var response = new PaginatedResponse<UIComponentListDto>
 			{
 				Items = dtos,
@@ -198,6 +227,16 @@ public class UIComponentController : ControllerBase
 			
 			var dtos = _mapper.Map<IEnumerable<UIComponentListDto>>(items);
 			
+			// Check if the current user has liked these components
+			if (User.Identity.IsAuthenticated)
+			{
+				var userId = User.GetUserId();
+				foreach (var dto in dtos)
+				{
+					dto.IsLikedByCurrentUser = await _repository.IsLikedByUserAsync(dto.Id, userId);
+				}
+			}
+			
 			var response = new PaginatedResponse<UIComponentListDto>
 			{
 				Items = dtos,
@@ -213,5 +252,68 @@ public class UIComponentController : ControllerBase
 		{
 			return StatusCode(500, "An error occurred while processing your request.");
 		}
+	}
+
+	// Like functionality endpoints
+	[HttpPost("{id}/like")]
+	public async Task<IActionResult> LikeComponent(Guid id)
+	{
+		if (!User.Identity.IsAuthenticated)
+			return Unauthorized();
+
+		var userId = User.GetUserId();
+		var result = await _repository.LikeComponentAsync(id, userId);
+
+		if (!result)
+			return NotFound("Component not found");
+
+		return NoContent();
+	}
+
+	[HttpPost("{id}/unlike")]
+	public async Task<IActionResult> UnlikeComponent(Guid id)
+	{
+		if (!User.Identity.IsAuthenticated)
+			return Unauthorized();
+
+		var userId = User.GetUserId();
+		var result = await _repository.UnlikeComponentAsync(id, userId);
+
+		if (!result)
+			return NotFound("Component or like not found");
+
+		return NoContent();
+	}
+
+	[HttpGet("{id}/likes")]
+	public async Task<ActionResult<IEnumerable<ComponentLikeDto>>> GetComponentLikes(Guid id)
+	{
+		var component = await _repository.GetByIdAsync(id);
+		if (component == null)
+			return NotFound("Component not found");
+
+		var likes = await _repository.GetComponentLikesAsync(id);
+		var dtos = _mapper.Map<IEnumerable<ComponentLikeDto>>(likes);
+
+		return Ok(dtos);
+	}
+
+	[HttpGet("liked")]
+	public async Task<ActionResult<IEnumerable<UIComponentListDto>>> GetLikedComponents()
+	{
+		if (!User.Identity.IsAuthenticated)
+			return Unauthorized();
+
+		var userId = User.GetUserId();
+		var components = await _repository.GetUserLikedComponentsAsync(userId, "Categories,Tags");
+		var dtos = _mapper.Map<IEnumerable<UIComponentListDto>>(components);
+
+		// Set isLikedByCurrentUser to true for all components in this list
+		foreach (var dto in dtos)
+		{
+			dto.IsLikedByCurrentUser = true;
+		}
+
+		return Ok(dtos);
 	}
 }

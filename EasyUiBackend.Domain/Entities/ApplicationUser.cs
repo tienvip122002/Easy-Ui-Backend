@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using System.Text.Json.Serialization;
 
 namespace EasyUiBackend.Domain.Entities
@@ -28,5 +28,9 @@ namespace EasyUiBackend.Domain.Entities
 
 		// Add this property to your ApplicationUser class
 		public virtual ICollection<Cart> CartItems { get; set; } = new List<Cart>();
+
+		// Components that the user has liked
+		public virtual ICollection<ComponentLike> LikedComponents { get; set; } = new List<ComponentLike>();
+		public virtual ICollection<UIComponent> LikedUIComponents { get; set; } = new List<UIComponent>();
 	}
 }

@@ -16,6 +16,8 @@ namespace EasyUiBackend.Domain.Models.UIComponent
         public int Downloads { get; set; }
         public int Views { get; set; }
         public double Rating { get; set; }
+        public int LikesCount { get; set; }
+        public bool IsLikedByCurrentUser { get; set; }
         
         // Simplified navigation properties
         public ICollection<string> Categories { get; set; }
@@ -38,5 +40,7 @@ namespace EasyUiBackend.Domain.Models.UIComponent
         public DateTime CreatedAt { get; set; }
         public int Downloads { get; set; }
         public double Rating { get; set; }
+        public int LikesCount { get; set; }
+        public bool IsLikedByCurrentUser { get; set; }
     }
 } 
