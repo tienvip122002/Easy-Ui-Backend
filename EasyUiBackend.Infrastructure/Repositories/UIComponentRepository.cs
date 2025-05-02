@@ -21,11 +21,20 @@ public class UIComponentRepository : IUIComponentRepository
 
 	public async Task<IEnumerable<UIComponent>> GetAllAsync(string includeProperties = "")
 	{
+		// Tự động include Creator để lấy thông tin tác giả
+		string effectiveIncludeProperties = includeProperties;
+		if (!includeProperties.Contains("Creator"))
+		{
+			effectiveIncludeProperties = string.IsNullOrEmpty(includeProperties) ? 
+				"Creator" : 
+				includeProperties + ",Creator";
+		}
+		
 		IQueryable<UIComponent> query = _context.UIComponents
 			.AsNoTracking()
 			.Where(x => x.IsActive); // Chỉ lấy các component đang active
 
-		foreach (var includeProperty in includeProperties.Split
+		foreach (var includeProperty in effectiveIncludeProperties.Split
 			(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
 		{
 			query = query.Include(includeProperty);
@@ -262,5 +271,16 @@ public class UIComponentRepository : IUIComponentRepository
 		return await query
 			.OrderByDescending(x => x.CreatedAt)
 			.ToListAsync();
+	}
+
+	// View tracking implementation
+	public async Task IncrementViewCountAsync(Guid componentId)
+	{
+		var component = await _context.UIComponents.FindAsync(componentId);
+		if (component != null)
+		{
+			component.Views += 1;
+			await _context.SaveChangesAsync();
+		}
 	}
 }

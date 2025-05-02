@@ -68,6 +68,11 @@ namespace EasyUiBackend.Domain.Entities
 			/// </summary>
 			public int LikesCount { get; set; } = 0;
 
+			/// <summary>
+			/// The number of views/impressions the component has received.
+			/// </summary>
+			public int Views { get; set; } = 0;
+
 			// Navigation properties
 			public virtual ApplicationUser? Creator { get; set; }
 			public virtual ApplicationUser? Updater { get; set; }

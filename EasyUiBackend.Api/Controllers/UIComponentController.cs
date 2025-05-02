@@ -57,7 +57,16 @@ public class UIComponentController : ControllerBase
 		if (component == null)
 			return NotFound();
 
+		// Tăng số lượng views khi API GetById được gọi
+		await _repository.IncrementViewCountAsync(id);
+
 		var dto = _mapper.Map<UIComponentDto>(component);
+		
+		// Gán giá trị PreviewUrl vào PreviewImage nếu PreviewImage đang null
+		if (string.IsNullOrEmpty(dto.PreviewImage) && !string.IsNullOrEmpty(component.PreviewUrl))
+		{
+			dto.PreviewImage = component.PreviewUrl;
+		}
 		
 		// Check if the current user has liked this component
 		if (User.Identity.IsAuthenticated)
