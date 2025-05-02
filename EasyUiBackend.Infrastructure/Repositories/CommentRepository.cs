@@ -38,7 +38,25 @@ public class CommentRepository : ICommentRepository
     {
         return await _context.Comments
             .Where(c => c.ComponentId == componentId && c.IsActive)
-            .ProjectTo<Comment>(_mapper.ConfigurationProvider)
+            .Join(_context.Users,
+                comment => comment.CreatedBy,
+                user => user.Id,
+                (comment, user) => new Comment
+                {
+                    Id = comment.Id,
+                    Content = comment.Content,
+                    ComponentId = comment.ComponentId,
+                    CreatedAt = comment.CreatedAt,
+                    CreatedBy = comment.CreatedBy,
+                    Creator = new ApplicationUser
+                    {
+                        Id = user.Id,
+                        UserName = user.UserName,
+                        FullName = user.FullName,
+                        Avatar = user.Avatar
+                    },
+                    IsActive = comment.IsActive
+                })
             .ToListAsync();
     }
 

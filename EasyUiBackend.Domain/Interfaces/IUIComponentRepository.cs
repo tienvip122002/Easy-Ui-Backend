@@ -20,5 +20,8 @@ namespace EasyUiBackend.Domain.Interfaces
         Task<bool> IsLikedByUserAsync(Guid componentId, Guid userId);
         Task<IEnumerable<ComponentLike>> GetComponentLikesAsync(Guid componentId);
         Task<IEnumerable<UIComponent>> GetUserLikedComponentsAsync(Guid userId, string includeProperties = "");
+        
+        // View tracking
+        Task IncrementViewCountAsync(Guid componentId);
     }
 } 
