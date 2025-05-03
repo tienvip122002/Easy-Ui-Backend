@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using EasyUiBackend.Domain.Interfaces;
 using EasyUiBackend.Domain.Entities;
@@ -28,22 +28,51 @@ public class UIComponentController : ControllerBase
 	}
 
 	[HttpGet]
-	public async Task<ActionResult<IEnumerable<UIComponentListDto>>> GetAll()
+	public async Task<ActionResult<PaginatedResponse<UIComponentListDto>>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
 	{
-		var components = await _repository.GetAllAsync(includeProperties: "Categories,Tags");
-		var dtos = _mapper.Map<IEnumerable<UIComponentListDto>>(components);
+		// Add pagination
+		var (components, totalCount) = await _repository.GetPagedAsync(
+			pageNumber, 
+			pageSize, 
+			includeProperties: "Categories,Tags"
+		);
 		
-		// Check if the current user has liked these components
-		if (User.Identity.IsAuthenticated)
+		var dtos = _mapper.Map<List<UIComponentListDto>>(components);
+		
+		// Process each component to set PreviewImage from PreviewUrl if needed
+		foreach (var dto in dtos)
 		{
-			var userId = User.GetUserId();
-			foreach (var dto in dtos)
+			// Find the corresponding component to get the PreviewUrl
+			var component = components.FirstOrDefault(c => c.Id == dto.Id);
+			if (component != null && string.IsNullOrEmpty(dto.PreviewImage) && !string.IsNullOrEmpty(component.PreviewUrl))
 			{
-				dto.IsLikedByCurrentUser = await _repository.IsLikedByUserAsync(dto.Id, userId);
+				dto.PreviewImage = component.PreviewUrl;
 			}
 		}
 		
-		return Ok(dtos);
+		// Optimize by checking all likes in a single query instead of per component
+		if (User.Identity.IsAuthenticated)
+		{
+			var userId = User.GetUserId();
+			var componentIds = dtos.Select(d => d.Id).ToList();
+			var likedComponentIds = await _repository.GetLikedComponentIdsByUserAsync(userId, componentIds);
+			
+			foreach (var dto in dtos)
+			{
+				dto.IsLikedByCurrentUser = likedComponentIds.Contains(dto.Id);
+			}
+		}
+		
+		var response = new PaginatedResponse<UIComponentListDto>
+		{
+			Items = dtos,
+			TotalCount = totalCount,
+			PageNumber = pageNumber,
+			PageSize = pageSize,
+			TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+		};
+		
+		return Ok(response);
 	}
 
 	[HttpGet("{id}")]
@@ -51,7 +80,7 @@ public class UIComponentController : ControllerBase
 	{
 		var component = await _repository.GetByIdAsync(
 			id,
-			includeProperties: "Categories,Tags,Comments,Comments.Creator"
+			includeProperties: "Categories,Tags,Comments,Comments.Creator,Creator"
 		);
 
 		if (component == null)

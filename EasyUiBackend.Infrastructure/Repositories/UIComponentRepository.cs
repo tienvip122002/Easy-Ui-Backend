@@ -283,4 +283,44 @@ public class UIComponentRepository : IUIComponentRepository
 			await _context.SaveChangesAsync();
 		}
 	}
+
+	public async Task<(IEnumerable<UIComponent> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, string includeProperties = "")
+	{
+		// Automatically include Creator to get author information
+		string effectiveIncludeProperties = includeProperties;
+		if (!includeProperties.Contains("Creator"))
+		{
+			effectiveIncludeProperties = string.IsNullOrEmpty(includeProperties) ? 
+				"Creator" : 
+				includeProperties + ",Creator";
+		}
+		
+		IQueryable<UIComponent> query = _context.UIComponents
+			.AsNoTracking()
+			.Where(x => x.IsActive);
+
+		foreach (var includeProperty in effectiveIncludeProperties.Split
+			(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+		{
+			query = query.Include(includeProperty);
+		}
+
+		var totalCount = await query.CountAsync();
+
+		var items = await query
+			.OrderByDescending(x => x.CreatedAt)
+			.Skip((pageNumber - 1) * pageSize)
+			.Take(pageSize)
+			.ToListAsync();
+
+		return (items, totalCount);
+	}
+
+	public async Task<ICollection<Guid>> GetLikedComponentIdsByUserAsync(Guid userId, ICollection<Guid> componentIds)
+	{
+		return await _context.ComponentLikes
+			.Where(cl => cl.UserId == userId && componentIds.Contains(cl.UIComponentId))
+			.Select(cl => cl.UIComponentId)
+			.ToListAsync();
+	}
 }

@@ -7,6 +7,7 @@ namespace EasyUiBackend.Domain.Interfaces
     public interface IUIComponentRepository
     {
         Task<IEnumerable<UIComponent>> GetAllAsync(string includeProperties = "");
+        Task<(IEnumerable<UIComponent> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize, string includeProperties = "");
         Task<UIComponent> GetByIdAsync(Guid id, string includeProperties = "");
         Task<UIComponent> AddAsync(UIComponent entity);
         Task UpdateAsync(UIComponent entity);
@@ -20,6 +21,7 @@ namespace EasyUiBackend.Domain.Interfaces
         Task<bool> IsLikedByUserAsync(Guid componentId, Guid userId);
         Task<IEnumerable<ComponentLike>> GetComponentLikesAsync(Guid componentId);
         Task<IEnumerable<UIComponent>> GetUserLikedComponentsAsync(Guid userId, string includeProperties = "");
+        Task<ICollection<Guid>> GetLikedComponentIdsByUserAsync(Guid userId, ICollection<Guid> componentIds);
         
         // View tracking
         Task IncrementViewCountAsync(Guid componentId);

@@ -19,6 +19,9 @@ namespace EasyUiBackend.Domain.Models.UIComponent
         public int LikesCount { get; set; }
         public bool IsLikedByCurrentUser { get; set; }
         
+        // Thông tin tác giả
+        public CreatorDto Creator { get; set; }
+        
         // Simplified navigation properties
         public ICollection<string> Categories { get; set; }
         public ICollection<string> Tags { get; set; }

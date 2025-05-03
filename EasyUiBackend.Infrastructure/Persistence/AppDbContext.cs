@@ -22,6 +22,7 @@ namespace EasyUiBackend.Infrastructure.Persistence
 		public DbSet<OrderItem> OrderItems { get; set; }
 		public DbSet<Payment> Payments { get; set; }
 		public DbSet<ComponentLike> ComponentLikes { get; set; }
+		public DbSet<UserFollow> UserFollows { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
@@ -144,6 +145,22 @@ namespace EasyUiBackend.Infrastructure.Persistence
 				.HasOne(p => p.Order)
 				.WithMany()
 				.HasForeignKey(p => p.OrderId)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			// Configure UserFollow relationships
+			builder.Entity<UserFollow>()
+				.HasKey(uf => new { uf.FollowerId, uf.FollowedId });
+
+			builder.Entity<UserFollow>()
+				.HasOne(uf => uf.Follower)
+				.WithMany(u => u.Following)
+				.HasForeignKey(uf => uf.FollowerId)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			builder.Entity<UserFollow>()
+				.HasOne(uf => uf.Followed)
+				.WithMany(u => u.Followers)
+				.HasForeignKey(uf => uf.FollowedId)
 				.OnDelete(DeleteBehavior.Restrict);
 		}
 	}

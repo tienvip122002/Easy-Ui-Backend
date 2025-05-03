@@ -32,5 +32,20 @@ namespace EasyUiBackend.Domain.Entities
 		// Components that the user has liked
 		public virtual ICollection<ComponentLike> LikedComponents { get; set; } = new List<ComponentLike>();
 		public virtual ICollection<UIComponent> LikedUIComponents { get; set; } = new List<UIComponent>();
+
+		// User follow relationships
+		// Users that are following this user
+		[JsonIgnore]
+		public virtual ICollection<UserFollow> Followers { get; set; } = new List<UserFollow>();
+		
+		// Users that this user is following
+		[JsonIgnore]
+		public virtual ICollection<UserFollow> Following { get; set; } = new List<UserFollow>();
+		
+		// Count of followers (for quick reference)
+		public int FollowersCount { get; set; }
+		
+		// Count of following (for quick reference)
+		public int FollowingCount { get; set; }
 	}
 }
