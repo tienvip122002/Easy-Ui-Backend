@@ -40,6 +40,8 @@ public class UIComponentMapping : Profile
 				opt.MapFrom(src => src.Comments))
 			.ForMember(dest => dest.LikesCount, opt => 
 				opt.MapFrom(src => src.LikesCount))
+			.ForMember(dest => dest.Creator, opt => 
+				opt.MapFrom(src => src.Creator))
 			.ForMember(dest => dest.IsLikedByCurrentUser, opt => opt.Ignore());
 
 		CreateMap<UIComponent, UIComponentListDto>()
