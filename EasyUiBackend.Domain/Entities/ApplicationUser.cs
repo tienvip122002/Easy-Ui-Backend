@@ -5,9 +5,15 @@ namespace EasyUiBackend.Domain.Entities
 {
 	public class ApplicationUser : IdentityUser<Guid>
 	{
-		// 
+		// Thông tin cá nhân
 		public string? FullName { get; set; }
 		public string? Avatar { get; set; }
+		public string? Location { get; set; }
+		public string? Bio { get; set; }
+		public string? Website { get; set; }
+		public string? WorkDisplayEmail { get; set; }
+		
+		// Thời gian
 		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 		public bool IsActive { get; set; } = true;
 
@@ -47,5 +53,9 @@ namespace EasyUiBackend.Domain.Entities
 		
 		// Count of following (for quick reference)
 		public int FollowingCount { get; set; }
+		
+		// Work history và education sẽ được lưu dưới dạng JSON string
+		public string? WorkHistory { get; set; }
+		public string? Education { get; set; }
 	}
 }
