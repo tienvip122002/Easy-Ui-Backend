@@ -263,15 +263,28 @@ public class UIComponentController : ControllerBase
 		{
 			var (items, totalCount) = await _repository.FilterAsync(request);
 			
-			var dtos = _mapper.Map<IEnumerable<UIComponentListDto>>(items);
+			var dtos = _mapper.Map<List<UIComponentListDto>>(items);
+			
+			// Xử lý PreviewImage từ PreviewUrl nếu cần
+			foreach (var dto in dtos)
+			{
+				var component = items.FirstOrDefault(c => c.Id == dto.Id);
+				if (component != null && string.IsNullOrEmpty(dto.PreviewImage) && !string.IsNullOrEmpty(component.PreviewUrl))
+				{
+					dto.PreviewImage = component.PreviewUrl;
+				}
+			}
 			
 			// Check if the current user has liked these components
 			if (User.Identity.IsAuthenticated)
 			{
 				var userId = User.GetUserId();
+				var componentIds = dtos.Select(d => d.Id).ToList();
+				var likedComponentIds = await _repository.GetLikedComponentIdsByUserAsync(userId, componentIds);
+				
 				foreach (var dto in dtos)
 				{
-					dto.IsLikedByCurrentUser = await _repository.IsLikedByUserAsync(dto.Id, userId);
+					dto.IsLikedByCurrentUser = likedComponentIds.Contains(dto.Id);
 				}
 			}
 			
@@ -353,5 +366,66 @@ public class UIComponentController : ControllerBase
 		}
 
 		return Ok(dtos);
+	}
+
+	[HttpGet("trending")]
+	public async Task<ActionResult<PaginatedResponse<UIComponentListDto>>> GetTrending(
+		[FromQuery] string sortBy = "popular", 
+		[FromQuery] int pageNumber = 1, 
+		[FromQuery] int pageSize = 10)
+	{
+		try
+		{
+			// Tạo request filter với sortBy được chỉ định
+			var request = new FilterUIComponentRequest
+			{
+				SortBy = sortBy,
+				PageNumber = pageNumber,
+				PageSize = pageSize
+			};
+			
+			// Gọi phương thức filter hiện có
+			var (items, totalCount) = await _repository.FilterAsync(request);
+			
+			var dtos = _mapper.Map<List<UIComponentListDto>>(items);
+			
+			// Xử lý PreviewImage từ PreviewUrl nếu cần
+			foreach (var dto in dtos)
+			{
+				var component = items.FirstOrDefault(c => c.Id == dto.Id);
+				if (component != null && string.IsNullOrEmpty(dto.PreviewImage) && !string.IsNullOrEmpty(component.PreviewUrl))
+				{
+					dto.PreviewImage = component.PreviewUrl;
+				}
+			}
+			
+			// Kiểm tra like status nếu user đã đăng nhập
+			if (User.Identity.IsAuthenticated)
+			{
+				var userId = User.GetUserId();
+				var componentIds = dtos.Select(d => d.Id).ToList();
+				var likedComponentIds = await _repository.GetLikedComponentIdsByUserAsync(userId, componentIds);
+				
+				foreach (var dto in dtos)
+				{
+					dto.IsLikedByCurrentUser = likedComponentIds.Contains(dto.Id);
+				}
+			}
+			
+			var response = new PaginatedResponse<UIComponentListDto>
+			{
+				Items = dtos,
+				TotalCount = totalCount,
+				PageNumber = pageNumber,
+				PageSize = pageSize,
+				TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+			};
+
+			return Ok(response);
+		}
+		catch (Exception ex)
+		{
+			return StatusCode(500, "An error occurred while processing your request.");
+		}
 	}
 }

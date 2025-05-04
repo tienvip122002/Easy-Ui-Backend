@@ -12,6 +12,9 @@ using EasyUiBackend.Infrastructure.Persistence;
 using EasyUiBackend.Domain.Models.UIComponent;
 using System.Linq;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity;
+using EasyUiBackend.Domain.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace EasyUiBackend.Api.Controllers
 {
@@ -24,17 +27,20 @@ namespace EasyUiBackend.Api.Controllers
         private readonly IIdentityService _identityService;
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public UserController(
             IUserFollowRepository repository,
             IIdentityService identityService,
             AppDbContext context,
-            IMapper mapper)
+            IMapper mapper,
+            UserManager<ApplicationUser> userManager)
         {
             _repository = repository;
             _identityService = identityService;
             _context = context;
             _mapper = mapper;
+            _userManager = userManager;
         }
 
         [HttpGet("{id}/profile")]
@@ -190,6 +196,116 @@ namespace EasyUiBackend.Api.Controllers
             };
             
             return Ok(response);
+        }
+
+        [HttpGet("me/detail")]
+        public async Task<ActionResult<UserDetailDto>> GetMyDetail()
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Unauthorized();
+                
+            var userId = User.GetUserId();
+            return await GetUserDetailById(userId);
+        }
+        
+        [HttpGet("{id}/detail")]
+        public async Task<ActionResult<UserDetailDto>> GetUserDetail(Guid id)
+        {
+            return await GetUserDetailById(id);
+        }
+        
+        private async Task<ActionResult<UserDetailDto>> GetUserDetailById(Guid userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            
+            if (user == null)
+                return NotFound("User not found");
+                
+            var userDetail = _mapper.Map<UserDetailDto>(user);
+            
+            // Kiểm tra trạng thái follow
+            if (User.Identity.IsAuthenticated)
+            {
+                var currentUserId = User.GetUserId();
+                userDetail.IsFollowedByCurrentUser = await _repository.IsFollowingAsync(currentUserId, userId);
+            }
+            
+            return Ok(userDetail);
+        }
+        
+        [HttpPut("me")]
+        public async Task<IActionResult> UpdateMyProfile([FromBody] UpdateUserProfileRequest request)
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Unauthorized();
+                
+            var userId = User.GetUserId();
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            
+            if (user == null)
+                return NotFound("User not found");
+                
+            // Cập nhật thông tin
+            _mapper.Map(request, user);
+            
+            // Cập nhật số điện thoại
+            if (!string.IsNullOrEmpty(request.PhoneNumber))
+            {
+                var phoneNumberResult = await _userManager.SetPhoneNumberAsync(user, request.PhoneNumber);
+                if (!phoneNumberResult.Succeeded)
+                {
+                    ModelState.AddModelError("PhoneNumber", "Không thể cập nhật số điện thoại");
+                    return BadRequest(ModelState);
+                }
+            }
+            
+            // Lưu các thay đổi khác
+            var result = await _userManager.UpdateAsync(user);
+            
+            if (result.Succeeded)
+                return NoContent();
+            
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+            
+            return BadRequest(ModelState);
+        }
+        
+        // Endpoint riêng để cập nhật avatar (sử dụng form data)
+        [HttpPost("me/avatar")]
+        public async Task<IActionResult> UpdateAvatar(IFormFile file)
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Unauthorized();
+                
+            var userId = User.GetUserId();
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            
+            if (user == null)
+                return NotFound("User not found");
+                
+            // Xử lý upload file avatar ở đây
+            // Đây chỉ là giải pháp tạm thời, bạn cần triển khai code upload file thực tế
+            if (file != null && file.Length > 0)
+            {
+                // Giả định có service lưu file và trả về URL
+                // string avatarUrl = await _fileService.UploadUserAvatar(file);
+                // user.Avatar = avatarUrl;
+                
+                // Tạm thời cài đặt mock
+                user.Avatar = $"/avatars/{userId}.jpg"; 
+                
+                var result = await _userManager.UpdateAsync(user);
+                
+                if (result.Succeeded)
+                    return Ok(new { avatarUrl = user.Avatar });
+                    
+                return BadRequest("Không thể cập nhật avatar");
+            }
+            
+            return BadRequest("Không có file avatar được tải lên");
         }
     }
 } 

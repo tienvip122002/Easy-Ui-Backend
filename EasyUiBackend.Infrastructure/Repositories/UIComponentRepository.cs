@@ -161,6 +161,8 @@ public class UIComponentRepository : IUIComponentRepository
 			"price_desc" => query.OrderByDescending(x => x.Price),
 			"created_at_desc" => query.OrderByDescending(x => x.CreatedAt),
 			"likes_desc" => query.OrderByDescending(x => x.LikesCount),
+			"views_desc" => query.OrderByDescending(x => x.Views),
+			"popular" => query.OrderByDescending(x => (x.Views * 0.7) + (x.LikesCount * 0.3)), // Kết hợp views và likes
 			_ => query.OrderByDescending(x => x.CreatedAt) // default sorting
 		};
 
@@ -171,6 +173,7 @@ public class UIComponentRepository : IUIComponentRepository
 		var items = await query
 			.Include(x => x.Categories)
 			.Include(x => x.Tags)
+			.Include(x => x.Creator) // Thêm Creator để trả về thông tin tác giả
 			.Skip((request.PageNumber - 1) * request.PageSize)
 			.Take(request.PageSize)
 			.ToListAsync();

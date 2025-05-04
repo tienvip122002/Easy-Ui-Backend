@@ -47,6 +47,8 @@ public class UIComponentMapping : Profile
 		CreateMap<UIComponent, UIComponentListDto>()
 			.ForMember(dest => dest.LikesCount, opt => 
 				opt.MapFrom(src => src.LikesCount))
+			.ForMember(dest => dest.Creator, opt => 
+				opt.MapFrom(src => src.Creator))
 			.ForMember(dest => dest.IsLikedByCurrentUser, opt => opt.Ignore());
 
 		// Thêm mapping cho CreatorDto

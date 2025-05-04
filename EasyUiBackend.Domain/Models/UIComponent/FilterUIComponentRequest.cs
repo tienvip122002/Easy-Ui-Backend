@@ -8,7 +8,16 @@ public class FilterUIComponentRequest
     public decimal? MaxPrice { get; set; }
     public List<Guid>? CategoryIds { get; set; }
     public List<Guid>? TagIds { get; set; }
-    public string? SortBy { get; set; } // price_asc, price_desc, created_at_desc
+    
+    // Tùy chọn sắp xếp: 
+    // - price_asc: Giá tăng dần
+    // - price_desc: Giá giảm dần
+    // - created_at_desc: Mới nhất
+    // - likes_desc: Nhiều lượt thích nhất
+    // - views_desc: Nhiều lượt xem nhất
+    // - popular: Phổ biến nhất (kết hợp lượt xem và lượt thích)
+    public string? SortBy { get; set; }
+    
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 10;
 } 
