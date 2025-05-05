@@ -150,6 +150,9 @@ builder.Services.AddAutoMapper(typeof(CategoryMapping).Assembly);
 // Configure Mail Settings
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
+// Configure App Settings
+builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+
 // Add HttpClient
 builder.Services.AddHttpClient();
 
