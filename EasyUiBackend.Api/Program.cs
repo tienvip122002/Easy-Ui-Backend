@@ -16,6 +16,7 @@ using System.Text.Json.Serialization;
 using AutoMapper;
 using EasyUiBackend.Infrastructure.Mappings;
 using System.Text.Encodings.Web;
+using EasyUiBackend.Domain.Models.Email;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -100,7 +101,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 
 	// User settings
 	options.User.RequireUniqueEmail = true;
-	options.SignIn.RequireConfirmedEmail = true;
+	options.SignIn.RequireConfirmedEmail = false;
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
@@ -146,6 +147,8 @@ builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IUserFollowRepository, UserFollowRepository>();
 builder.Services.AddAutoMapper(typeof(CategoryMapping).Assembly);
 
+// Configure Mail Settings
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
 // Add HttpClient
 builder.Services.AddHttpClient();
