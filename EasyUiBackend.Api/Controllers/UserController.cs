@@ -35,6 +35,7 @@ namespace EasyUiBackend.Api.Controllers
         private readonly IMapper _mapper;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly MailSettings _mailSettings;
+        private readonly AppSettings _appSettings;
 
         public UserController(
             IUserFollowRepository repository,
@@ -42,7 +43,8 @@ namespace EasyUiBackend.Api.Controllers
             AppDbContext context,
             IMapper mapper,
             UserManager<ApplicationUser> userManager,
-            IOptions<MailSettings> mailSettings)
+            IOptions<MailSettings> mailSettings,
+            IOptions<AppSettings> appSettings)
         {
             _repository = repository;
             _identityService = identityService;
@@ -50,6 +52,7 @@ namespace EasyUiBackend.Api.Controllers
             _mapper = mapper;
             _userManager = userManager;
             _mailSettings = mailSettings.Value;
+            _appSettings = appSettings.Value;
         }
 
         [HttpGet("{id}/profile")]
@@ -376,8 +379,8 @@ namespace EasyUiBackend.Api.Controllers
             // Encode the token for URL safety
             token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
             
-            // Build the confirmation link - Important: Update this URL to match your frontend URL
-            var confirmationLink = $"http://localhost:3000/verify-email?userId={user.Id}&token={token}";
+            // Build the confirmation link - Using FrontendUrl from AppSettings
+            var confirmationLink = $"{_appSettings.FrontendUrl}/verify-email?userId={user.Id}&token={token}";
             
             try
             {
