@@ -31,18 +31,18 @@ namespace EasyUiBackend.Domain.Models.User
     {
         public string Title { get; set; }
         public string Company { get; set; }
-        public string StartDate { get; set; }
-        public string EndDate { get; set; }
+        public string YearStart { get; set; }
+        public string YearEnd { get; set; }
         public string Description { get; set; }
     }
     
     public class EducationItem
     {
-        public string School { get; set; }
+        public string Institution { get; set; }
         public string Degree { get; set; }
         public string Field { get; set; }
-        public string StartDate { get; set; }
-        public string EndDate { get; set; }
+        public string StartYear { get; set; }
+        public string EndYear { get; set; }
         public string Description { get; set; }
     }
 } 
