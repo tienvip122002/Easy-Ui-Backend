@@ -34,7 +34,7 @@ builder.Services.AddCors(options =>
 {
 	options.AddPolicy("AllowReactApp", policy =>
 	{
-		policy.WithOrigins("http://localhost:3000")
+		policy.WithOrigins("https://easy-ui-eight.vercel.app/")
 			  .AllowAnyHeader()
 			  .AllowAnyMethod()
 			  .AllowCredentials();
