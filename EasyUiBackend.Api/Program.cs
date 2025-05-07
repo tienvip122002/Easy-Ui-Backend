@@ -11,6 +11,7 @@ using EasyUiBackend.Infrastructure.Seeds;
 using EasyUiBackend.Infrastructure.Repositories;
 using Microsoft.OpenApi.Models;
 
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 using AutoMapper;
@@ -27,6 +28,9 @@ builder.Services.AddControllers()
 	{
 		options.JsonSerializerOptions.WriteIndented = true;
 		options.JsonSerializerOptions.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+		options.JsonSerializerOptions.AllowTrailingCommas = true;
+		options.JsonSerializerOptions.ReadCommentHandling = JsonCommentHandling.Skip;
+		options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
 		options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 	});
 // Cấu hình cors
@@ -150,6 +154,7 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IPaymentService, MomoPaymentService>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IUserFollowRepository, UserFollowRepository>();
+builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
 builder.Services.AddAutoMapper(typeof(CategoryMapping).Assembly);
 
 // Configure Mail Settings
