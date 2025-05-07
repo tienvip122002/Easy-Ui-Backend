@@ -29,21 +29,23 @@ builder.Services.AddControllers()
 		options.JsonSerializerOptions.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
 		options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 	});
-// Cấu hình CORS
+// Cấu hình cors
 builder.Services.AddCors(options =>
 {
 	options.AddPolicy("AllowReactApp", policy =>
 	{
 		policy.WithOrigins(
 				"https://easy-ui-eight.vercel.app",
-				"http://localhost:3000"
+				"http://localhost:3000",
+				"http://localhost:8080",
+				"https://easy-ui-backend.onrender.com"
 			)
-			.AllowAnyHeader()
-			.AllowAnyMethod()
-			.AllowCredentials();
+			  .AllowAnyHeader()
+			  .AllowAnyMethod()
+			  .AllowCredentials();
+
 	});
 });
-
 
 // Cấu hình Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -169,11 +171,11 @@ if (app.Environment.IsDevelopment())
 	app.UseSwaggerUI(c =>
 	{
 		c.SwaggerEndpoint("/swagger/v1/swagger.json", "EasyUI API V1");
-        //c.RoutePrefix = string.Empty; // Để Swagger UI hiển thị ở root URL
+		//c.RoutePrefix = string.Empty; // Để Swagger UI hiển thị ở root URL
 	});
 }
 
- //app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
