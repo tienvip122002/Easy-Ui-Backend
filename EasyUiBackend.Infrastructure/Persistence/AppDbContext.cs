@@ -23,6 +23,7 @@ namespace EasyUiBackend.Infrastructure.Persistence
 		public DbSet<Payment> Payments { get; set; }
 		public DbSet<ComponentLike> ComponentLikes { get; set; }
 		public DbSet<UserFollow> UserFollows { get; set; }
+		public DbSet<Article> Articles { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
@@ -162,6 +163,13 @@ namespace EasyUiBackend.Infrastructure.Persistence
 				.WithMany(u => u.Followers)
 				.HasForeignKey(uf => uf.FollowedId)
 				.OnDelete(DeleteBehavior.Restrict);
+
+			// Configure Article relationships
+			builder.Entity<Article>()
+				.HasOne(a => a.Author)
+				.WithMany(u => u.AuthoredArticles)
+				.HasForeignKey(a => a.AuthorId)
+				.OnDelete(DeleteBehavior.SetNull);
 		}
 	}
 }

@@ -1,5 +1,7 @@
 using EasyUiBackend.Domain.Entities;
-using EasyUiBackend.Domain.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace EasyUiBackend.Domain.Interfaces
 {
