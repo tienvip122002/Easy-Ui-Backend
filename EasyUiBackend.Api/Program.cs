@@ -11,7 +11,6 @@ using EasyUiBackend.Infrastructure.Seeds;
 using EasyUiBackend.Infrastructure.Repositories;
 using Microsoft.OpenApi.Models;
 
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 using AutoMapper;
@@ -28,9 +27,6 @@ builder.Services.AddControllers()
 	{
 		options.JsonSerializerOptions.WriteIndented = true;
 		options.JsonSerializerOptions.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
-		options.JsonSerializerOptions.AllowTrailingCommas = true;
-		options.JsonSerializerOptions.ReadCommentHandling = JsonCommentHandling.Skip;
-		options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
 		options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 	});
 // Cấu hình cors

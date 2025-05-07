@@ -18,13 +18,11 @@ namespace EasyUiBackend.Infrastructure.Mappings
 
             // CreateArticleRequest -> Article
             CreateMap<CreateArticleRequest, Article>()
-                .ForMember(dest => dest.PublishedAt, opt => opt.MapFrom(src => src.PublishedAt.HasValue ? src.PublishedAt.Value : DateTime.UtcNow))
-                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => !string.IsNullOrEmpty(src.Description) ? src.Description : src.ShortDescription));
+                .ForMember(dest => dest.PublishedAt, opt => opt.MapFrom(src => src.PublishedAt.HasValue ? src.PublishedAt.Value : DateTime.UtcNow));
 
             // UpdateArticleRequest -> Article
             CreateMap<UpdateArticleRequest, Article>()
-                .ForMember(dest => dest.PublishedAt, opt => opt.MapFrom(src => src.PublishedAt.HasValue ? src.PublishedAt.Value : DateTime.UtcNow))
-                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => !string.IsNullOrEmpty(src.Description) ? src.Description : src.ShortDescription));
+                .ForMember(dest => dest.PublishedAt, opt => opt.MapFrom(src => src.PublishedAt.HasValue ? src.PublishedAt.Value : DateTime.UtcNow));
         }
     }
 } 

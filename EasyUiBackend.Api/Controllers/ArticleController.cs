@@ -115,9 +115,6 @@ namespace EasyUiBackend.Api.Controllers
         [Authorize]
         public async Task<ActionResult<ArticleResponse>> Create([FromBody] CreateArticleRequest request)
         {
-            if (request == null)
-                return BadRequest("Request body cannot be null");
-
             var article = _mapper.Map<Article>(request);
             article.AuthorId = User.GetUserId();
             
@@ -134,9 +131,6 @@ namespace EasyUiBackend.Api.Controllers
         [Authorize]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateArticleRequest request)
         {
-            if (request == null)
-                return BadRequest("Request body cannot be null");
-
             var article = await _repository.GetByIdAsync(id);
             
             if (article == null)
