@@ -16,6 +16,13 @@ namespace EasyUiBackend.Infrastructure.Mappings
                 PropertyNameCaseInsensitive = true
             };
             
+            // Add mapping for ApplicationUser to UserSummaryResponse
+            CreateMap<ApplicationUser, UserSummaryResponse>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName))
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
+                .ForMember(dest => dest.Avatar, opt => opt.MapFrom(src => src.Avatar));
+            
             // User follow mappings
             CreateMap<UserFollow, UserFollowDto>()
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.FollowerId))
