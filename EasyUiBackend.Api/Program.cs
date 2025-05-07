@@ -29,18 +29,21 @@ builder.Services.AddControllers()
 		options.JsonSerializerOptions.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
 		options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 	});
-// Cấu hình cors
+// Cấu hình CORS
 builder.Services.AddCors(options =>
 {
 	options.AddPolicy("AllowReactApp", policy =>
 	{
-		policy.WithOrigins("https://easy-ui-eight.vercel.app")
-			  .AllowAnyHeader()
-			  .AllowAnyMethod()
-			  .AllowCredentials();
-
+		policy.WithOrigins(
+				"https://easy-ui-eight.vercel.app",
+				"http://localhost:3000"
+			)
+			.AllowAnyHeader()
+			.AllowAnyMethod()
+			.AllowCredentials();
 	});
 });
+
 
 // Cấu hình Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
