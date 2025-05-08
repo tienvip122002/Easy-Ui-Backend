@@ -45,6 +45,20 @@ namespace EasyUiBackend.Api.Controllers
             }
         }
 
+        [HttpPost("google-login")]
+        public async Task<ActionResult<AuthResponse>> GoogleLogin([FromBody] GoogleLoginRequest request)
+        {
+            try
+            {
+                var result = await _identityService.GoogleLoginAsync(request);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
         [Authorize]
         [HttpGet("profile")]
         public async Task<ActionResult<UserProfileDto>> GetProfile()
