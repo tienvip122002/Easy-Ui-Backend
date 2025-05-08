@@ -8,6 +8,7 @@ using EasyUiBackend.Domain.Entities;
 using EasyUiBackend.Domain.Interfaces;
 using EasyUiBackend.Domain.Models.Auth;
 using AutoMapper;
+using Google.Apis.Auth;
 
 namespace EasyUiBackend.Infrastructure.Services
 {
@@ -44,6 +45,84 @@ namespace EasyUiBackend.Infrastructure.Services
                 RefreshToken = "", // Implement refresh token if needed
                 Expiration = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["JWT:TokenValidityInMinutes"]))
             };
+        }
+
+        public async Task<AuthResponse> GoogleLoginAsync(GoogleLoginRequest request)
+        {
+            try
+            {
+                // Validate the Google token
+                var settings = new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = new[] { _configuration["Authentication:Google:ClientId"] }
+                };
+                
+                var payload = await GoogleJsonWebSignature.ValidateAsync(request.GoogleToken, settings);
+                
+                // Check if user exists with this email
+                var user = await _userManager.FindByEmailAsync(payload.Email);
+                
+                if (user == null)
+                {
+                    // Create new user if they don't exist
+                    user = new ApplicationUser
+                    {
+                        Email = payload.Email,
+                        UserName = payload.Email.Split('@')[0], // Use email as username but remove domain
+                        FullName = payload.Name,
+                        Avatar = payload.Picture,
+                        EmailConfirmed = true, // Google already confirmed the email
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    var result = await _userManager.CreateAsync(user);
+                    if (!result.Succeeded)
+                        throw new Exception($"Failed to create user from Google account: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                    
+                    // You could add the user to a "Google" role if needed
+                    // await _userManager.AddToRoleAsync(user, "GoogleUser");
+                }
+                else 
+                {
+                    // Update existing user information from Google if needed
+                    bool needsUpdate = false;
+                    
+                    if (string.IsNullOrEmpty(user.FullName) && !string.IsNullOrEmpty(payload.Name))
+                    {
+                        user.FullName = payload.Name;
+                        needsUpdate = true;
+                    }
+                    
+                    if (string.IsNullOrEmpty(user.Avatar) && !string.IsNullOrEmpty(payload.Picture))
+                    {
+                        user.Avatar = payload.Picture;
+                        needsUpdate = true;
+                    }
+                    
+                    if (needsUpdate)
+                    {
+                        await _userManager.UpdateAsync(user);
+                    }
+                }
+
+                // Generate JWT token
+                var token = await GenerateJwtToken(user);
+                
+                return new AuthResponse
+                {
+                    Token = token,
+                    RefreshToken = "", // Implement refresh token if needed
+                    Expiration = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["JWT:TokenValidityInMinutes"]))
+                };
+            }
+            catch (InvalidJwtException ex)
+            {
+                throw new Exception($"Invalid Google token: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Google authentication failed: {ex.Message}");
+            }
         }
 
         public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
