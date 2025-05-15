@@ -60,5 +60,9 @@ namespace EasyUiBackend.Domain.Entities
 		// Work history và education sẽ được lưu dưới dạng JSON string
 		public string? WorkHistory { get; set; }
 		public string? Education { get; set; }
+        
+        // RefreshToken collection
+        [JsonIgnore]
+        public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 	}
 }

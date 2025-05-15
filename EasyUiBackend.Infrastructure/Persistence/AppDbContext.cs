@@ -24,6 +24,7 @@ namespace EasyUiBackend.Infrastructure.Persistence
 		public DbSet<ComponentLike> ComponentLikes { get; set; }
 		public DbSet<UserFollow> UserFollows { get; set; }
 		public DbSet<Article> Articles { get; set; }
+		public DbSet<RefreshToken> RefreshTokens { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
@@ -170,6 +171,13 @@ namespace EasyUiBackend.Infrastructure.Persistence
 				.WithMany(u => u.AuthoredArticles)
 				.HasForeignKey(a => a.AuthorId)
 				.OnDelete(DeleteBehavior.SetNull);
+
+			// Configure RefreshToken relationships
+			builder.Entity<RefreshToken>()
+				.HasOne(rt => rt.User)
+				.WithMany(u => u.RefreshTokens)
+				.HasForeignKey(rt => rt.UserId)
+				.OnDelete(DeleteBehavior.Cascade);
 		}
 	}
 }

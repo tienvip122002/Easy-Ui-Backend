@@ -59,6 +59,40 @@ namespace EasyUiBackend.Api.Controllers
             }
         }
 
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<AuthResponse>> RefreshToken([FromBody] RefreshTokenRequest request)
+        {
+            try
+            {
+                var result = await _identityService.RefreshTokenAsync(request.RefreshToken);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        [Authorize]
+        [HttpPost("revoke-token")]
+        public async Task<ActionResult> RevokeToken()
+        {
+            try
+            {
+                var userId = User.GetUserId().ToString();
+                var result = await _identityService.RevokeTokenAsync(userId);
+                
+                if (result)
+                    return Ok(new { Message = "Tokens revoked successfully" });
+                else
+                    return BadRequest(new { Message = "Failed to revoke tokens" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
         [Authorize]
         [HttpGet("profile")]
         public async Task<ActionResult<UserProfileDto>> GetProfile()
