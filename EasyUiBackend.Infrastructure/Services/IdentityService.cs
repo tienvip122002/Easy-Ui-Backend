@@ -9,6 +9,9 @@ using EasyUiBackend.Domain.Interfaces;
 using EasyUiBackend.Domain.Models.Auth;
 using AutoMapper;
 using Google.Apis.Auth;
+using System.Security.Cryptography;
+using Microsoft.EntityFrameworkCore;
+using EasyUiBackend.Infrastructure.Persistence;
 
 namespace EasyUiBackend.Infrastructure.Services
 {
@@ -17,15 +20,18 @@ namespace EasyUiBackend.Infrastructure.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
+        private readonly AppDbContext _context;
 
         public IdentityService(
             UserManager<ApplicationUser> userManager,
             IConfiguration configuration,
-            IMapper mapper)
+            IMapper mapper,
+            AppDbContext context)
         {
             _userManager = userManager;
             _configuration = configuration;
             _mapper = mapper;
+            _context = context;
         }
 
         public async Task<AuthResponse> LoginAsync(LoginRequest request)
@@ -39,10 +45,13 @@ namespace EasyUiBackend.Infrastructure.Services
                 throw new Exception("Invalid password");
 
             var token = await GenerateJwtToken(user);
+            var refreshToken = GenerateRefreshToken();
+            await SaveRefreshTokenAsync(user, refreshToken);
+
             return new AuthResponse
             {
                 Token = token,
-                RefreshToken = "", // Implement refresh token if needed
+                RefreshToken = refreshToken.Token,
                 Expiration = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["JWT:TokenValidityInMinutes"]))
             };
         }
@@ -107,11 +116,13 @@ namespace EasyUiBackend.Infrastructure.Services
 
                 // Generate JWT token
                 var token = await GenerateJwtToken(user);
+                var refreshToken = GenerateRefreshToken();
+                await SaveRefreshTokenAsync(user, refreshToken);
                 
                 return new AuthResponse
                 {
                     Token = token,
-                    RefreshToken = "", // Implement refresh token if needed
+                    RefreshToken = refreshToken.Token,
                     Expiration = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["JWT:TokenValidityInMinutes"]))
                 };
             }
@@ -145,10 +156,13 @@ namespace EasyUiBackend.Infrastructure.Services
                 throw new Exception($"User creation failed: {string.Join(", ", result.Errors.Select(e => e.Description))}");
 
             var token = await GenerateJwtToken(user);
+            var refreshToken = GenerateRefreshToken();
+            await SaveRefreshTokenAsync(user, refreshToken);
+
             return new AuthResponse
             {
                 Token = token,
-                RefreshToken = "", // Implement refresh token if needed
+                RefreshToken = refreshToken.Token,
                 Expiration = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["JWT:TokenValidityInMinutes"]))
             };
         }
@@ -183,16 +197,91 @@ namespace EasyUiBackend.Infrastructure.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public Task<AuthResponse> RefreshTokenAsync(string refreshToken)
+        private RefreshToken GenerateRefreshToken()
         {
-            // Implement refresh token logic if needed
-            throw new NotImplementedException();
+            var randomNumber = new byte[32];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            
+            return new RefreshToken
+            {
+                Token = Convert.ToBase64String(randomNumber),
+                ExpiryTime = DateTime.UtcNow.AddDays(7), // Refresh token valid for 7 days
+                CreatedAt = DateTime.UtcNow
+            };
         }
 
-        public Task<bool> RevokeTokenAsync(string userId)
+        private async Task SaveRefreshTokenAsync(ApplicationUser user, RefreshToken refreshToken)
         {
-            // Implement token revocation if needed
-            throw new NotImplementedException();
+            // Set JwtId and UserId
+            refreshToken.JwtId = Guid.NewGuid().ToString();
+            refreshToken.UserId = user.Id;
+            
+            // Add to context
+            await _context.RefreshTokens.AddAsync(refreshToken);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<AuthResponse> RefreshTokenAsync(string refreshToken)
+        {
+            var storedToken = await _context.RefreshTokens
+                .Include(rt => rt.User)
+                .FirstOrDefaultAsync(rt => rt.Token == refreshToken);
+
+            if (storedToken == null)
+                throw new Exception("Invalid refresh token");
+
+            if (storedToken.ExpiryTime < DateTime.UtcNow)
+                throw new Exception("Refresh token expired");
+
+            if (storedToken.IsRevoked)
+                throw new Exception("Refresh token revoked");
+
+            if (storedToken.IsUsed)
+                throw new Exception("Refresh token has been used");
+
+            // Update current token
+            storedToken.IsUsed = true;
+            _context.RefreshTokens.Update(storedToken);
+            
+            // Generate new tokens
+            var user = storedToken.User;
+            var newJwtToken = await GenerateJwtToken(user);
+            var newRefreshToken = GenerateRefreshToken();
+            
+            // Save new refresh token
+            await SaveRefreshTokenAsync(user, newRefreshToken);
+            await _context.SaveChangesAsync();
+
+            return new AuthResponse
+            {
+                Token = newJwtToken,
+                RefreshToken = newRefreshToken.Token,
+                Expiration = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["JWT:TokenValidityInMinutes"]))
+            };
+        }
+
+        public async Task<bool> RevokeTokenAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return false;
+
+            // Mark all refresh tokens for this user as revoked
+            var refreshTokens = await _context.RefreshTokens
+                .Where(rt => rt.UserId == Guid.Parse(userId) && !rt.IsRevoked)
+                .ToListAsync();
+
+            if (!refreshTokens.Any())
+                return false;
+
+            foreach (var token in refreshTokens)
+            {
+                token.IsRevoked = true;
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<UserProfileDto> GetUserProfileAsync(Guid userId)
