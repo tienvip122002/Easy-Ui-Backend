@@ -10,5 +10,6 @@ namespace EasyUiBackend.Domain.Interfaces
         Task<bool> RevokeTokenAsync(string userId);
         Task<UserProfileDto> GetUserProfileAsync(Guid userId);
         Task<AuthResponse> GoogleLoginAsync(GoogleLoginRequest request);
+        Task<bool> HealthCheckAsync();
     }
 } 

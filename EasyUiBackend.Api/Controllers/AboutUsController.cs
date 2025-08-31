@@ -10,7 +10,6 @@ namespace EasyUiBackend.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
 public class AboutUsController : ControllerBase
 {
     private readonly IAboutUsRepository _repository;
