@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EasyUiBackend.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250506191214_artical")]
-    partial class artical
+    [Migration("20250828182344_FreshStart")]
+    partial class FreshStart
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -607,6 +607,42 @@ namespace EasyUiBackend.Infrastructure.Migrations
                     b.ToTable("Payments");
                 });
 
+            modelBuilder.Entity("EasyUiBackend.Domain.Entities.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiryTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("JwtId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("EasyUiBackend.Domain.Entities.Tag", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1040,6 +1076,17 @@ namespace EasyUiBackend.Infrastructure.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("EasyUiBackend.Domain.Entities.RefreshToken", b =>
+                {
+                    b.HasOne("EasyUiBackend.Domain.Entities.ApplicationUser", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("EasyUiBackend.Domain.Entities.Tag", b =>
                 {
                     b.HasOne("EasyUiBackend.Domain.Entities.ApplicationUser", "Creator")
@@ -1180,6 +1227,8 @@ namespace EasyUiBackend.Infrastructure.Migrations
                     b.Navigation("Following");
 
                     b.Navigation("LikedComponents");
+
+                    b.Navigation("RefreshTokens");
 
                     b.Navigation("UpdatedCategories");
 

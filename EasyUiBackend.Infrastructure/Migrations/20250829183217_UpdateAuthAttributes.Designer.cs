@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EasyUiBackend.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250422165412_AddImageTable")]
-    partial class AddImageTable
+    [Migration("20250829183217_UpdateAuthAttributes")]
+    partial class UpdateAuthAttributes
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -153,12 +153,18 @@ namespace EasyUiBackend.Infrastructure.Migrations
                     b.Property<string>("Avatar")
                         .HasColumnType("text");
 
+                    b.Property<string>("Bio")
+                        .HasColumnType("text");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Education")
+                        .HasColumnType("text");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -167,11 +173,20 @@ namespace EasyUiBackend.Infrastructure.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<int>("FollowersCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("FollowingCount")
+                        .HasColumnType("integer");
+
                     b.Property<string>("FullName")
                         .HasColumnType("text");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("text");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
@@ -206,6 +221,15 @@ namespace EasyUiBackend.Infrastructure.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<string>("Website")
+                        .HasColumnType("text");
+
+                    b.Property<string>("WorkDisplayEmail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("WorkHistory")
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
@@ -216,6 +240,63 @@ namespace EasyUiBackend.Infrastructure.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("EasyUiBackend.Domain.Entities.Article", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AuthorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("PublishedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ShortDescription")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ViewCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.ToTable("Articles");
                 });
 
             modelBuilder.Entity("EasyUiBackend.Domain.Entities.Cart", b =>
@@ -340,66 +421,22 @@ namespace EasyUiBackend.Infrastructure.Migrations
                     b.ToTable("Comments");
                 });
 
-            modelBuilder.Entity("EasyUiBackend.Domain.Entities.Image", b =>
+            modelBuilder.Entity("EasyUiBackend.Domain.Entities.ComponentLike", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("ContentType")
-                        .HasColumnType("text");
+                    b.Property<Guid>("UIComponentId")
+                        .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime>("LikedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<long>("FileSize")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("ImageType")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsMain")
-                        .HasColumnType("boolean");
-
-                    b.Property<int?>("OrderNumber")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("OriginalFileName")
-                        .HasColumnType("text");
-
-                    b.Property<Guid?>("UIComponentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedBy");
+                    b.HasKey("UserId", "UIComponentId");
 
                     b.HasIndex("UIComponentId");
 
-                    b.ToTable("Images");
+                    b.ToTable("ComponentLikes");
                 });
 
             modelBuilder.Entity("EasyUiBackend.Domain.Entities.Order", b =>
@@ -570,6 +607,42 @@ namespace EasyUiBackend.Infrastructure.Migrations
                     b.ToTable("Payments");
                 });
 
+            modelBuilder.Entity("EasyUiBackend.Domain.Entities.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiryTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("JwtId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("EasyUiBackend.Domain.Entities.Tag", b =>
                 {
                     b.Property<Guid>("Id")
@@ -637,6 +710,9 @@ namespace EasyUiBackend.Infrastructure.Migrations
                     b.Property<string>("Js")
                         .HasColumnType("text");
 
+                    b.Property<int>("LikesCount")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -656,6 +732,9 @@ namespace EasyUiBackend.Infrastructure.Migrations
                     b.Property<Guid?>("UpdatedBy")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("Views")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedBy");
@@ -663,6 +742,24 @@ namespace EasyUiBackend.Infrastructure.Migrations
                     b.HasIndex("UpdatedBy");
 
                     b.ToTable("UIComponents");
+                });
+
+            modelBuilder.Entity("EasyUiBackend.Domain.Entities.UserFollow", b =>
+                {
+                    b.Property<Guid>("FollowerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("FollowedId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("FollowedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("FollowerId", "FollowedId");
+
+                    b.HasIndex("FollowedId");
+
+                    b.ToTable("UserFollows");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -828,6 +925,16 @@ namespace EasyUiBackend.Infrastructure.Migrations
                     b.Navigation("Updater");
                 });
 
+            modelBuilder.Entity("EasyUiBackend.Domain.Entities.Article", b =>
+                {
+                    b.HasOne("EasyUiBackend.Domain.Entities.ApplicationUser", "Author")
+                        .WithMany("AuthoredArticles")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Author");
+                });
+
             modelBuilder.Entity("EasyUiBackend.Domain.Entities.Cart", b =>
                 {
                     b.HasOne("EasyUiBackend.Domain.Entities.ApplicationUser", null)
@@ -897,21 +1004,23 @@ namespace EasyUiBackend.Infrastructure.Migrations
                     b.Navigation("Updater");
                 });
 
-            modelBuilder.Entity("EasyUiBackend.Domain.Entities.Image", b =>
+            modelBuilder.Entity("EasyUiBackend.Domain.Entities.ComponentLike", b =>
                 {
-                    b.HasOne("EasyUiBackend.Domain.Entities.ApplicationUser", "Creator")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("EasyUiBackend.Domain.Entities.UIComponent", "UIComponent")
-                        .WithMany("Images")
+                        .WithMany("Likes")
                         .HasForeignKey("UIComponentId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Creator");
+                    b.HasOne("EasyUiBackend.Domain.Entities.ApplicationUser", "User")
+                        .WithMany("LikedComponents")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("UIComponent");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("EasyUiBackend.Domain.Entities.Order", b =>
@@ -967,6 +1076,17 @@ namespace EasyUiBackend.Infrastructure.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("EasyUiBackend.Domain.Entities.RefreshToken", b =>
+                {
+                    b.HasOne("EasyUiBackend.Domain.Entities.ApplicationUser", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("EasyUiBackend.Domain.Entities.Tag", b =>
                 {
                     b.HasOne("EasyUiBackend.Domain.Entities.ApplicationUser", "Creator")
@@ -999,6 +1119,25 @@ namespace EasyUiBackend.Infrastructure.Migrations
                     b.Navigation("Creator");
 
                     b.Navigation("Updater");
+                });
+
+            modelBuilder.Entity("EasyUiBackend.Domain.Entities.UserFollow", b =>
+                {
+                    b.HasOne("EasyUiBackend.Domain.Entities.ApplicationUser", "Followed")
+                        .WithMany("Followers")
+                        .HasForeignKey("FollowedId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("EasyUiBackend.Domain.Entities.ApplicationUser", "Follower")
+                        .WithMany("Following")
+                        .HasForeignKey("FollowerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Followed");
+
+                    b.Navigation("Follower");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -1069,6 +1208,8 @@ namespace EasyUiBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("EasyUiBackend.Domain.Entities.ApplicationUser", b =>
                 {
+                    b.Navigation("AuthoredArticles");
+
                     b.Navigation("CartItems");
 
                     b.Navigation("Comments");
@@ -1080,6 +1221,14 @@ namespace EasyUiBackend.Infrastructure.Migrations
                     b.Navigation("CreatedComponents");
 
                     b.Navigation("CreatedTags");
+
+                    b.Navigation("Followers");
+
+                    b.Navigation("Following");
+
+                    b.Navigation("LikedComponents");
+
+                    b.Navigation("RefreshTokens");
 
                     b.Navigation("UpdatedCategories");
 
@@ -1099,7 +1248,7 @@ namespace EasyUiBackend.Infrastructure.Migrations
                 {
                     b.Navigation("Comments");
 
-                    b.Navigation("Images");
+                    b.Navigation("Likes");
                 });
 #pragma warning restore 612, 618
         }

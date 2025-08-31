@@ -297,5 +297,19 @@ namespace EasyUiBackend.Infrastructure.Services
             
             return profile;
         }
+
+        public async Task<bool> HealthCheckAsync()
+        {
+            try
+            {
+                // Test database connection by trying to access users table
+                var userCount = await _context.Users.CountAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 } 

@@ -13,7 +13,6 @@ namespace EasyUiBackend.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
 public class UIComponentController : ControllerBase
 {
 	private readonly IUIComponentRepository _repository;
@@ -108,6 +107,7 @@ public class UIComponentController : ControllerBase
 	}
 
 	[HttpPost]
+	[Authorize]
 	public async Task<ActionResult<UIComponent>> Create([FromBody] CreateUIComponentRequest request)
 	{
 		// Đảm bảo Price có giá trị mặc định là 0 nếu không được cung cấp
@@ -130,6 +130,7 @@ public class UIComponentController : ControllerBase
 	}
 
 	[HttpPut("{id}")]
+	[Authorize]
 	public async Task<IActionResult> Update(Guid id, [FromBody] UpdateUIComponentRequest request)
 	{
 		var existing = await _repository.GetByIdAsync(id);
@@ -156,6 +157,7 @@ public class UIComponentController : ControllerBase
 	}
 
 	[HttpDelete("{id}")]
+	[Authorize]
 	public async Task<IActionResult> Delete(Guid id)
 	{
 		await _repository.DeleteAsync(id);
@@ -307,6 +309,7 @@ public class UIComponentController : ControllerBase
 
 	// Like functionality endpoints
 	[HttpPost("{id}/like")]
+	[Authorize]
 	public async Task<IActionResult> LikeComponent(Guid id)
 	{
 		if (!User.Identity.IsAuthenticated)
@@ -321,7 +324,8 @@ public class UIComponentController : ControllerBase
 		return NoContent();
 	}
 
-	[HttpPost("{id}/unlike")]
+	[HttpDelete("{id}/like")]
+	[Authorize]
 	public async Task<IActionResult> UnlikeComponent(Guid id)
 	{
 		if (!User.Identity.IsAuthenticated)

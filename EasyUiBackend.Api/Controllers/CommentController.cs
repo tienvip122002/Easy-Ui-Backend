@@ -10,7 +10,6 @@ namespace EasyUiBackend.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
 public class CommentController : ControllerBase
 {
     private readonly ICommentRepository _repository;

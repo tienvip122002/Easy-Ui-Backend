@@ -14,7 +14,6 @@ namespace EasyUiBackend.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
 public class CategoryController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -45,6 +44,7 @@ public class CategoryController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<ActionResult<Category>> Create([FromBody] CreateCategoryRequest request)
     {
         var category = _mapper.Map<Category>(request);
@@ -56,6 +56,7 @@ public class CategoryController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCategoryRequest request)
     {
         var existing = await _context.Categories.FirstOrDefaultAsync(c => c.Id == id);
@@ -70,6 +71,7 @@ public class CategoryController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize]
     public async Task<IActionResult> Delete(Guid id)
     {
         var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == id);
